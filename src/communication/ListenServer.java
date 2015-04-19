@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import replica.InputPacket;
 import util.Queue;
@@ -21,27 +22,28 @@ public class ListenServer extends Thread {
 	final int port;
 	final String procNum;
 	final List<IncomingSock> socketList;
-	final Config conf;
+	//final Config conf;
+	final Logger logger;
 	final ServerSocket serverSock;
 	Queue<InputPacket> queue;
 
-	protected ListenServer(Config conf, List<IncomingSock> sockets, 
+	protected ListenServer(Logger logger, String procNum, int port, List<IncomingSock> sockets, 
 			Queue<InputPacket> queue) {
-		this.conf = conf;
+		this.logger = logger;
 		this.socketList = sockets;
 		this.queue = queue;
 
-		procNum = conf.procNum;
-		port = conf.ports.get(procNum);
+		this.procNum = procNum;
+		this.port = port;
 		try {
 			serverSock = new ServerSocket(port);
-			conf.logger.info(String.format(
+			logger.info(String.format(
 					"Server %s: Server connection established", procNum));
 		} catch (IOException e) {
 			String errStr = String.format(
 					"Server %s: [FATAL] Can't open server port %d", procNum,
 					port);
-			conf.logger.log(Level.SEVERE, errStr);
+			logger.log(Level.SEVERE, errStr);
 			throw new Error(errStr);
 		}
 	}
@@ -50,16 +52,16 @@ public class ListenServer extends Thread {
 		while (!killSig) {
 			try {
 				IncomingSock incomingSock = new IncomingSock(
-						serverSock.accept(), conf, queue);
+						serverSock.accept(), logger, queue);
 				socketList.add(incomingSock);
 				incomingSock.start();
-				conf.logger.info(String.format(
+				logger.info(String.format(
 						"Server %s: New incoming connection accepted from %s",
 						procNum, incomingSock.sock.getInetAddress()
 								.getHostName()));
 			} catch (IOException e) {
 				if (!killSig) {
-					conf.logger.log(Level.INFO, String.format(
+					logger.log(Level.INFO, String.format(
 							"Server %s: Incoming socket failed", procNum), e);
 				}
 			}
@@ -71,7 +73,7 @@ public class ListenServer extends Thread {
 		try {
 			serverSock.close();
 		} catch (IOException e) {
-			conf.logger.log(Level.INFO,String.format(
+			logger.log(Level.INFO,String.format(
 					"Server %s: Error closing server socket", procNum), e);
 		}
 	}

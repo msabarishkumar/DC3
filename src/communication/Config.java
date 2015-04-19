@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Formatter;
@@ -30,48 +31,9 @@ public class Config {
 	 * @throws IOException
 	 */
 	public Config(String filename, Handler fh) throws FileNotFoundException, IOException {
-		logger = Logger.getLogger("NetFramework");
 		
-		logger.setUseParentHandlers(false);
+		setUpLogger(fh);
 		
-		Logger globalLogger = Logger.getLogger("global");
-		Handler[] handlers = globalLogger.getHandlers();
-		for(Handler handler : handlers) {
-		    globalLogger.removeHandler(handler);
-		}
-		
-		Formatter formatter = new Formatter() {
-
-            @Override
-            public String format(LogRecord arg0) {
-                StringBuilder b = new StringBuilder();
-//                b.append("[");
-//                b.append(arg0.getSourceClassName());
-//                b.append("-");
-//                b.append(arg0.getSourceMethodName());
-//                b.append(" ");
-//                b.append("] ")
-                b.append(arg0.getMillis() / 1000);
-                b.append(" || ");
-                b.append("[Thread:");
-                b.append(arg0.getThreadID());
-                b.append("] || ");
-                b.append(arg0.getLevel());
-                b.append(" || ");
-                b.append(arg0.getMessage());
-                b.append(System.getProperty("line.separator"));
-                return b.toString();
-            }
-
-        };
-		fh.setFormatter(formatter);
-		logger.addHandler(fh);
-		
-        LogManager lm = LogManager.getLogManager();
-        lm.addLogger(logger);
-
-		logger.setLevel(Level.FINEST);
-
 		Properties prop = new Properties();
 		prop.load(new FileInputStream(filename));
 		numProcesses = loadInt(prop,"NumProcesses");
@@ -95,9 +57,70 @@ public class Config {
 	/**
 	 * Default constructor for those who want to populate config file manually
 	 */
-	public Config() {
-	}
+		public Config(Logger logger) throws UnknownHostException {
+			
+			this.logger = logger;
+			
+			numProcesses = 1;
+			addresses = new HashMap<String, InetAddress>();
+			ports = new HashMap<String, Integer>();
+			//procNum = procnum;
+			
+			//addresses = new InetAddress[numProcesses];
+			//ports = new int[numProcesses];
+			//for(int thisConnection = 0; thisConnection < numProcesses; thisConnection++){
+			//	addresses[thisConnection] = InetAddress.getLocalHost();
+			//	ports[thisConnection] = basePort + thisConnection;
+			//}
+			
+			logger = Logger.getLogger("NetFramework");
+			
+		}
 
+		private void setUpLogger(Handler fh){
+			logger = Logger.getLogger("NetFramework");
+			
+			logger.setUseParentHandlers(false);
+			
+			Logger globalLogger = Logger.getLogger("global");
+			Handler[] handlers = globalLogger.getHandlers();
+			for(Handler handler : handlers) {
+			    globalLogger.removeHandler(handler);
+			}
+			
+			Formatter formatter = new Formatter() {
+
+	            @Override
+	            public String format(LogRecord arg0) {
+	                StringBuilder b = new StringBuilder();
+//	                b.append("[");
+//	                b.append(arg0.getSourceClassName());
+//	                b.append("-");
+//	                b.append(arg0.getSourceMethodName());
+//	                b.append(" ");
+//	                b.append("] ")
+	                b.append(arg0.getMillis() / 1000);
+	                b.append(" || ");
+	                b.append("[Thread:");
+	                b.append(arg0.getThreadID());
+	                b.append("] || ");
+	                b.append(arg0.getLevel());
+	                b.append(" || ");
+	                b.append(arg0.getMessage());
+	                b.append(System.getProperty("line.separator"));
+	                return b.toString();
+	            }
+
+	        };
+			fh.setFormatter(formatter);
+			logger.addHandler(fh);
+			
+	        LogManager lm = LogManager.getLogManager();
+	        lm.addLogger(logger);
+
+			logger.setLevel(Level.FINEST);
+		}
+		
 	/**
 	 * Array of addresses of other hosts.  All hosts should have identical info here.
 	 */

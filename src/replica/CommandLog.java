@@ -76,12 +76,9 @@ public class CommandLog {
 					} else {
 						if (!Replica.disconnectedNodes.containsKey(op.process_id)) {
 							controller.outSockets.put(op.process_id, null);
-							try {
-								controller.config.ports.put(op.process_id, Integer.parseInt(op.port));
-								controller.config.addresses.put(op.process_id, InetAddress.getByName(op.host));
-							} catch (UnknownHostException e) {
-								e.printStackTrace();
-							}
+							controller.connect(op.process_id, Integer.parseInt(op.port));
+							//controller.config.ports.put(op.process_id, Integer.parseInt(op.port));
+							//controller.config.addresses.put(op.process_id, InetAddress.getByName(op.host));
 						}
 					}
 				} else {

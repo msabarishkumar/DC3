@@ -3,8 +3,12 @@ package replica;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import communication.Config;
 import communication.NetController;
@@ -19,6 +23,7 @@ public class Replica {
 		
 	// Instance of the config associated with this replica.
 	static Config config;
+	Logger logger;
 	
 	// Event queue for storing all the messages from the wire. This queue would be passed to the NetController.
 	final Queue<InputPacket> queue;
@@ -46,13 +51,14 @@ public class Replica {
 	
 	public static HashMap<String, Boolean> disconnectedNodes = new HashMap<String, Boolean>();
 	
-	public Replica(String processId) {
+	public Replica(String processId, int port) {
 		this.processId = processId;
 		this.cmds = new CommandLog(this.processId);
 		
 		try {
 			Handler fh = new FileHandler(System.getProperty("LOG_FOLDER") + "/" + processId + ".log");
 			fh.setLevel(Level.FINEST);
+			setUpLogger(fh);
 			
 			config = new Config(System.getProperty("CONFIG_NAME"), fh);		
 			
@@ -65,7 +71,7 @@ public class Replica {
 	
 		// Start NetController and start receiving messages from other servers.
 		this.queue = new Queue<InputPacket>();
-		controller = new NetController(processId, config, queue);
+		controller = new NetController(processId, port, logger, queue);
 	}
 	
 	public void startReceivingMessages() {
@@ -99,7 +105,52 @@ public class Replica {
 	}
 	
 	public static void main(String[] args) {
-		Replica replica = new Replica(args[0]);
+		Replica replica = new Replica(args[0], Integer.parseInt(args[1]));
 		replica.startReceivingMessages();
+	}
+	
+	
+	private void setUpLogger(Handler fh){
+		logger = Logger.getLogger("NetFramework");
+		
+		logger.setUseParentHandlers(false);
+		
+		Logger globalLogger = Logger.getLogger("global");
+		Handler[] handlers = globalLogger.getHandlers();
+		for(Handler handler : handlers) {
+		    globalLogger.removeHandler(handler);
+		}
+		
+		Formatter formatter = new Formatter() {
+
+            @Override
+            public String format(LogRecord arg0) {
+                StringBuilder b = new StringBuilder();
+//                b.append("[");
+//                b.append(arg0.getSourceClassName());
+//                b.append("-");
+//                b.append(arg0.getSourceMethodName());
+//                b.append(" ");
+//                b.append("] ")
+                b.append(arg0.getMillis() / 1000);
+                b.append(" || ");
+                b.append("[Thread:");
+                b.append(arg0.getThreadID());
+                b.append("] || ");
+                b.append(arg0.getLevel());
+                b.append(" || ");
+                b.append(arg0.getMessage());
+                b.append(System.getProperty("line.separator"));
+                return b.toString();
+            }
+
+        };
+		fh.setFormatter(formatter);
+		logger.addHandler(fh);
+		
+        LogManager lm = LogManager.getLogManager();
+        lm.addLogger(logger);
+
+		logger.setLevel(Level.FINEST);
 	}
 }

@@ -16,6 +16,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import replica.InputPacket;
 import util.Queue;
@@ -28,21 +29,21 @@ public class IncomingSock extends Thread {
 	private volatile boolean shutdownSet;
 	Queue<InputPacket> queue;
 	int bytesLastChecked = 0;
-	Config conf;
+	Logger logger;
 	
-	protected IncomingSock(Socket sock, Config conf, 
+	protected IncomingSock(Socket sock, Logger logger, 
 			Queue<InputPacket> queue) throws IOException {
 		this.sock = sock;
 		in = new BufferedInputStream(sock.getInputStream());
 		out = new BufferedOutputStream(sock.getOutputStream());
 		this.queue = queue;
-		this.conf = conf;
+		this.logger = logger;
 	}
 	
 	protected List<InputPacket> getMsgs() {
 		List<InputPacket> msgs = new ArrayList<InputPacket>();
 		InputPacket tmp;
-		conf.logger.log(Level.INFO, "Queue size" + queue.size());
+		logger.log(Level.INFO, "Queue size" + queue.size());
 		while((tmp = queue.poll()) != null)
 			msgs.add(tmp);
 		return msgs;
@@ -64,10 +65,10 @@ public class IncomingSock extends Thread {
 					while ((curIdx = dataStr.indexOf(MSG_SEP, curPtr)) != -1) {
 						InputPacket packet = new InputPacket(dataStr.substring(curPtr, curIdx), out);
 						if (packet.msg.startsWith("pause")) {
-							conf.logger.info("Going to pause the process.");
+							logger.info("Going to pause the process.");
 							Queue.pausedFlag = true;
 						} else if (packet.msg.startsWith("continue")) {
-							conf.logger.info("Going to resume the process.");
+							logger.info("Going to resume the process.");
 							Queue.pausedFlag = false;
 							queue.offer(packet);
 						} else {
@@ -80,10 +81,10 @@ public class IncomingSock extends Thread {
 					bytesLastChecked = avail - curPtr;
 				}
 			} catch (IOException e) {
-				conf.logger.log(Level.INFO, "Exception" + e.toString());
+				logger.log(Level.INFO, "Exception" + e.toString());
 				e.printStackTrace();
 			} catch (InterruptedException e) {
-				conf.logger.log(Level.INFO, "Exception" + e.toString());
+				logger.log(Level.INFO, "Exception" + e.toString());
 				e.printStackTrace();
 			}
 		}

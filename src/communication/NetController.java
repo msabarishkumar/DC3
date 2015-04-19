@@ -12,7 +12,9 @@
 package communication;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import replica.InputPacket;
 import replica.Replica;
@@ -33,15 +36,23 @@ import util.Queue;
  *
  */
 public class NetController {
-	public final Config config;
+	public String procNum;
+	public InetAddress address;
+	public HashMap<String, Integer> ports;
+	
+	//public final Config config;
+	public Logger logger;  // same as replica's
 	private final List<IncomingSock> inSockets;
 	public final HashMap<String, OutgoingSock> outSockets;
 	private final ListenServer listener;
 	
+	/*
 	public NetController(String processId, Config config, Queue<InputPacket> queue) {
 		this.config = config;
-		this.config.procNum = processId;
-
+		this.procNum = processId;
+		addresses = config.addresses;
+		ports = config.ports;
+		
 		inSockets = Collections.synchronizedList(new ArrayList<IncomingSock>());
 		outSockets = new HashMap<String, OutgoingSock>();
 		
@@ -51,6 +62,23 @@ public class NetController {
 
 		listener = new ListenServer(config, inSockets, queue);
 		listener.start();
+	}*/
+	
+	public NetController(String processId, int myPort, Logger logger, Queue<InputPacket> queue){
+		this.logger = logger;
+		this.procNum = processId;
+		try {
+			address = InetAddress.getByName("localhost");
+		} catch (UnknownHostException e) { e.printStackTrace();}
+		ports = new HashMap<String, Integer>();
+		
+		//ports.put(procNum, myPort);
+		
+		inSockets = Collections.synchronizedList(new ArrayList<IncomingSock>());
+		outSockets = new HashMap<String, OutgoingSock>();
+
+		listener = new ListenServer(logger, procNum, myPort, inSockets, queue);
+		listener.start();
 	}
 	
 	// Establish outgoing connection to a process.
@@ -58,14 +86,14 @@ public class NetController {
 		if (outSockets.get(proc) != null)
 			throw new IllegalStateException("proc " + proc + " not null");
 		
-		outSockets.put(proc, new OutgoingSock(new Socket(config.addresses.get(proc), config.ports.get("" + proc))));
-		config.logger.info(String.format("Server %s: Socket to %s established", 
-				config.procNum, proc));
+		outSockets.put(proc, new OutgoingSock(new Socket(address, ports.get(proc))));
+		logger.info(String.format("Server %s: Socket to %s established", 
+				procNum, proc));
 	}
 	
 	public synchronized void sendMsgs(Set<String> processes, String msg) {//, int partial_count) {
 		for(String processNo: processes) {	
-			config.logger.info("Sending: " + msg + " to " + processNo);
+			logger.info("Sending: " + msg + " to " + processNo);
 			sendMsg(processNo, msg);
 		}
 	}
@@ -74,7 +102,7 @@ public class NetController {
 	{
 		Set<String> keySet = new HashSet<String>(outSockets.keySet());
 		for (String processId: keySet) {
-			if (processId.equals(this.config.procNum) || (exceptProcess != null && exceptProcess.containsKey(processId))) {
+			if (processId.equals(this.procNum) || (exceptProcess != null && exceptProcess.containsKey(processId))) {
 				continue;
 			}
 			sendMsg(processId, msg);
@@ -82,7 +110,7 @@ public class NetController {
 	}
 	
 	public synchronized boolean sendMsg(String process, String msg) {
-		config.logger.info("Sending Message to " + process + ":	" + msg);
+		logger.info("Sending Message to " + process + ":	" + msg);
 		try {
 			if (outSockets.get(process) == null)
 				initOutgoingConn(process);
@@ -111,8 +139,8 @@ public class NetController {
 			}
 			//config.logger.info(String.format("Server %d: Msg to %d failed.", 
 			//	config.procNum, process));
-			config.logger.log(Level.FINE, String.format("Server %s: Socket to %s error", 
-				config.procNum, process), e);
+			logger.log(Level.FINE, String.format("Server %s: Socket to %s error", 
+				procNum, process), e);
 			return false;
 		}
 		return true;
@@ -124,7 +152,7 @@ public class NetController {
 	 */
 	public synchronized List<InputPacket> getReceivedMsgs() {
 		List<InputPacket> objs = new ArrayList<InputPacket>();
-		config.logger.log(Level.INFO, "Looking for messages.");
+		logger.log(Level.INFO, "Looking for messages.");
 		synchronized(inSockets) {
 			ListIterator<IncomingSock> iter  = inSockets.listIterator();
 			while (iter.hasNext()) {
@@ -132,8 +160,8 @@ public class NetController {
 				try {
 					objs.addAll(curSock.getMsgs());
 				} catch (Exception e) {
-					config.logger.log(Level.INFO, 
-							"Server " + config.procNum + " received bad data on a socket", e);
+					logger.log(Level.INFO, 
+							"Server " + procNum + " received bad data on a socket", e);
 					curSock.cleanShutdown();
 					iter.remove();
 				}
@@ -165,10 +193,17 @@ public class NetController {
 		outSockets.remove(nodeToDisconnect);
 	}
 	
-	public void connect(String nodeToConnect) {
-		if (!outSockets.containsKey(nodeToConnect)) {
+	public void connect(String nodeToConnect, int portnum) {
+		if(ports.containsKey(nodeToConnect)){
+			logger.warning("tried to connect to "+nodeToConnect+" when already connected");
+		} else{
+			ports.put(nodeToConnect, portnum);
+			
 			Replica.disconnectedNodes.remove(nodeToConnect);
 			outSockets.put(nodeToConnect, null);
+			try {
+				initOutgoingConn(nodeToConnect);
+			} catch (IOException e) { e.printStackTrace(); }
 		}
 	}
 	
@@ -179,11 +214,12 @@ public class NetController {
 		outSockets.clear();
 	}
 	
+	/*
 	public void connectAll() {
-		for (String node: this.config.addresses.keySet()) {
+		for (String node: this.ports.keySet()) {
 			connect(node);
 		}
 		Replica.disconnectedNodes.clear();
-	}
+	}*/
 
 }
