@@ -3,6 +3,7 @@ package replica;
 import java.io.Serializable;
 
 public class Operation implements Serializable {
+	
 	public static final String SEPARATOR = "==";
 	
 	OperationType type;
@@ -17,7 +18,7 @@ public class Operation implements Serializable {
 		op.type = type;
 		op.song = strSplit[1];
 		
-		if (type == OperationType.ADD || type == OperationType.EDIT) {
+		if (type == OperationType.PUT) {
 			op.url = strSplit[2];
 		}
 		

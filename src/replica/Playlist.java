@@ -10,15 +10,11 @@ public class Playlist {
 	
 	public void performOperation(Operation op) throws SongNotFoundException {
 		switch (op.type) {
-			case ADD:
+			case PUT:
 				add(op.song, op.url);
 				break;
 			case DELETE:
 				delete(op.song);
-				break;
-			case EDIT:
-				edit(op.song, op.url);
-				break;
 		}
 	}
 	
