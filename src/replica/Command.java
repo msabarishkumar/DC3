@@ -61,7 +61,7 @@ public class Command implements Serializable {
 	
 	public static Command fromString(String command) {
 		String[] commandSplit = command.split(Command.SEPARATOR);
-		Replica.config.logger.fine("Going to construct Command from: " + command);
+		//Replica.config.logger.fine("Going to construct Command from: " + command);
 
 		try {
 			Command newCmd = new Command(Integer.parseInt(commandSplit[0]), 

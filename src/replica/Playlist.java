@@ -40,6 +40,13 @@ public class Playlist {
 		throw new SongNotFoundException("Could not find song: " + song);
 	}
 	
+	public synchronized String read(String song){
+		if(this.playList.containsKey(song)){
+			return this.playList.get(song);
+		}
+		return "ERR_KEY";
+	}
+	
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Playlist: \n");

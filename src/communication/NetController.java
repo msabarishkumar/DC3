@@ -194,9 +194,9 @@ public class NetController {
 	}
 	
 	public void connect(String nodeToConnect, int portnum) {
-		if(ports.containsKey(nodeToConnect)){
-			logger.warning("tried to connect to "+nodeToConnect+" when already connected");
-		} else{
+		//if(ports.containsKey(nodeToConnect)){
+		//	logger.warning("tried to connect to "+nodeToConnect+" when already connected");
+		//} else{
 			ports.put(nodeToConnect, portnum);
 			
 			Replica.disconnectedNodes.remove(nodeToConnect);
@@ -204,7 +204,7 @@ public class NetController {
 			try {
 				initOutgoingConn(nodeToConnect);
 			} catch (IOException e) { e.printStackTrace(); }
-		}
+		//}
 	}
 	
 	public void forgetAll() {
