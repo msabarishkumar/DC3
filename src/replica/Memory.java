@@ -1,5 +1,6 @@
 package replica;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ public class Memory {
 	public static void main(String[] args){
 		String name = "o";
 		String name2  = "<3,o>";
-		Replica rex = new Replica(name,0);
+		Replica rex = new Replica(0);
 		Memory me = rex.memory;
 		
 		Operation op1 = Operation.operationFromString("PUT==lo==hi");
@@ -24,6 +25,9 @@ public class Memory {
 		Command c3 = new Command(-1, 3, name, op3);
 		Operation op4 = Operation.operationFromString("PUT==med==sand");
 		Command c4 = new Command(-1, 1, name2, op4);
+		
+		me.tentativeClock.put("o", (long) 0);
+		me.committedClock.put("o", (long) 0);
 		
 		me.acceptCommand(c2);
 		me.garbageCollect();
@@ -65,6 +69,7 @@ public class Memory {
 	
 	public HashMap<String, Long> tentativeClock = new HashMap<String, Long>();
 	public HashMap<String, Long> committedClock = new HashMap<String, Long>();
+	public List<Command> committedWriteLog = new ArrayList<Command>();
 	public List<Command> deliveredWriteLog = new LinkedList<Command>();
 	public List<Command> undeliveredWriteLog = new LinkedList<Command>();
 	public int csn = 0;
@@ -74,8 +79,8 @@ public class Memory {
 	
 	public Memory(Replica replica){
 		this.replica = replica;
-		tentativeClock.put(replica.processId, (long) 0);
-		committedClock.put(replica.processId, (long) 0);
+		tentativeClock.put("0", (long) 0);
+		committedClock.put("0", (long) 0);
 	}
 	
 	/** Add a command to the correct log, and perform if possible*/
@@ -84,6 +89,7 @@ public class Memory {
 			replica.performCommittedOperation(command.operation);
 			replica.logger.info("Committing: "+command.toString());
 			committedClock.put(command.serverId, command.acceptStamp);
+			committedWriteLog.add(csn, command);
 			csn++;
 			return true;
 		}
@@ -181,7 +187,30 @@ public class Memory {
 		}
 		return Integer.MIN_VALUE;
 	}
+	
+	/** the next available stamp for this server, called when making new operation */
+	long myNextCommand(){
+		return tentativeClock.get(replica.processId)+1;
+	}
 
+	/** locate which commands are needed for anti-entropy */
+	HashSet<Command> unseenCommands(VectorClock other){
+		HashSet<Command> output = new HashSet<Command>();
+		for(Command c : deliveredWriteLog){
+			if(completeV(other.clock, c.serverId) == c.acceptStamp - 1){
+				output.add(c);
+				other.clock.put(c.serverId, c.acceptStamp);
+			}
+		}
+		for(Command c : committedWriteLog){
+			if(completeV(other.committedclock, c.serverId) < c.acceptStamp){
+				output.add(c);
+				other.committedclock.put(c.serverId, c.acceptStamp);
+			}
+		}
+		return output;
+	}
+	
 	
 	// below are methods for testing
 	
@@ -208,6 +237,10 @@ public class Memory {
 		}
 		System.out.println("---- delivered messages:");
 		for(Command c : deliveredWriteLog){
+			System.out.println(c.toString());
+		}
+		System.out.println("---- committed messages:");
+		for(Command c : committedWriteLog){
 			System.out.println(c.toString());
 		}
 	}

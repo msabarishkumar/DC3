@@ -21,11 +21,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import replica.InputPacket;
+import replica.NamingProtocol;
 import replica.Replica;
 import util.Queue;
 
@@ -44,6 +46,7 @@ public class NetController {
 	public Logger logger;  // same as replica's
 	private final List<IncomingSock> inSockets;
 	public final HashMap<String, OutgoingSock> outSockets;
+	public final Set<String> disconnectedNodes = new HashSet<String>();
 	private final ListenServer listener;
 	
 	/*
@@ -79,6 +82,9 @@ public class NetController {
 
 		listener = new ListenServer(logger, procNum, myPort, inSockets, queue);
 		listener.start();
+		
+		// temporary, for sans-client instructions
+		connect("myself",myPort);
 	}
 	
 	// Establish outgoing connection to a process.
@@ -98,16 +104,35 @@ public class NetController {
 		}
 	}
 	
-	public synchronized void broadCastMsgs(String msg, HashMap<String, Boolean> exceptProcess)
+	public synchronized void broadCastMsgs(String msg, HashSet<String> exceptProcess)
 	{
 		Set<String> keySet = new HashSet<String>(outSockets.keySet());
 		for (String processId: keySet) {
-			if (processId.equals(this.procNum) || (exceptProcess != null && exceptProcess.containsKey(processId))) {
+			if (processId.equals(this.procNum) || (exceptProcess != null && exceptProcess.contains(processId))) {
 				continue;
 			}
 			sendMsg(processId, msg);
 		}
 	}
+	
+	public synchronized void sendMsgToRandom(String msg){
+		Set<String> nodes = outSockets.keySet();
+		nodes.removeAll(disconnectedNodes);
+		nodes.remove("myself");
+		Object[] servers = nodes.toArray();
+		int randomindex = new Random().nextInt(servers.length);
+		
+		String chosenServer = (String) servers[randomindex];
+		logger.info("randomly picked server "+chosenServer);
+		logger.info("   sending "+msg);
+		sendMsg(chosenServer, msg);
+	}
+	
+	/** so servers can send to those whose "name" they do not know, for instance when first joining */
+	//public synchronized boolean sendMsgToPort(int port, String msg){
+	//	connect(NamingProtocol.uniqueName(port), port);
+	//	return sendMsg(NamingProtocol.uniqueName(port), msg);
+	//}
 	
 	public synchronized boolean sendMsg(String process, String msg) {
 		logger.info("Sending Message to " + process + ":	" + msg);
@@ -189,27 +214,28 @@ public class NetController {
 	}
 
 	public void disconnect(String nodeToDisconnect) {
-		Replica.disconnectedNodes.put(nodeToDisconnect, true);
-		outSockets.remove(nodeToDisconnect);
+		disconnectedNodes.add(nodeToDisconnect);
+		//outSockets.remove(nodeToDisconnect);
 	}
 	
 	public void connect(String nodeToConnect, int portnum) {
-		//if(ports.containsKey(nodeToConnect)){
-		//	logger.warning("tried to connect to "+nodeToConnect+" when already connected");
-		//} else{
+		disconnectedNodes.remove(nodeToConnect);
+		
+		if(ports.containsKey(nodeToConnect)){
+			logger.warning("tried to connect to "+nodeToConnect+" when already connected");
+		} else{
 			ports.put(nodeToConnect, portnum);
 			
-			Replica.disconnectedNodes.remove(nodeToConnect);
 			outSockets.put(nodeToConnect, null);
 			try {
 				initOutgoingConn(nodeToConnect);
 			} catch (IOException e) { e.printStackTrace(); }
-		//}
+		}
 	}
 	
 	public void forgetAll() {
 		for (String pid : outSockets.keySet()) {
-			Replica.disconnectedNodes.put(pid, true);
+			disconnectedNodes.add(pid);
 		}
 		outSockets.clear();
 	}

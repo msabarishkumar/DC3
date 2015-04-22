@@ -1,11 +1,11 @@
 package replica;
 
 public enum MessageType {
-	// Messages that define valid Operations.
+	// Messages that define valid Operations, from Client
 	OPERATION,
 	
 	// Entropy.
-	ENTROPY,
+	ENTROPY_REQUEST, ENTROPY_COMMAND,
 	
 	// Read.
 	READ,
@@ -15,7 +15,7 @@ public enum MessageType {
 	CONNECT,
 	
 	// RETIRE.
-	RETIRE,
+	//RETIRE,
 	STOP_RETIRING, // When someone receives this message, this server would not respond to any retire request.
 	STOP_RETIRING_REJECTED,
 	STOP_RETIRING_APPROVED, // When someone gets a stop_retiring request, it sends back approval.
@@ -23,5 +23,5 @@ public enum MessageType {
 	SET_FREE, // When someone gets this message, then can retire now.
 	
 	// JOIN.
-	JOIN,
+	JOIN, NAME,
 }

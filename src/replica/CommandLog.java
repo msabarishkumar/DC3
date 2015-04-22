@@ -1,14 +1,11 @@
 package replica;
 
 import java.io.FileNotFoundException;
+
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
-
-import communication.NetController;
 
 public class CommandLog {
 	static final String COMMAND_SEPARATOR = "#";
@@ -63,42 +60,24 @@ public class CommandLog {
 	}
 	
 	// First sort all the commands and write them to file.
-	public void writeToFile(NetController controller) {
+	public void writeToFile() {
 		sort();
 		Replica.playlist.clear();
-		try {
+		try(
 			PrintWriter writer = new PrintWriter(this.commandLogFileName, "UTF-8");
+		){
 			for(Command cmd: this.cmds) {
-				if (cmd.operation instanceof AddRetireOperation) {
-					AddRetireOperation op = (AddRetireOperation)cmd.operation;
-					if (op.type == OperationType.RETIRE_NODE) {
-						controller.outSockets.remove(op.process_id);
-					} else {
-						if (!Replica.disconnectedNodes.containsKey(op.process_id)) {
-							controller.outSockets.put(op.process_id, null);
-							controller.connect(op.process_id, Integer.parseInt(op.port));
-							//controller.config.ports.put(op.process_id, Integer.parseInt(op.port));
-							//controller.config.addresses.put(op.process_id, InetAddress.getByName(op.host));
-						}
-					}
-				} else {
-					Replica.playlist.performOperation(cmd.operation);
-				}
 				writer.write(cmd.toString());
 				writer.write("\n");
 			}
-			writer.close();
-		} catch (SongNotFoundException e) {
-			e.printStackTrace();
-		}
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	// Create a comparator and sort the cmds.
+	// Create a comparator and sort the commands.
 	public void sort() {
 		Collections.sort(this.cmds, comparator);
 	}
