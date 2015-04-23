@@ -138,16 +138,16 @@ public class Memory {
 	/** commit all uncommitted messages, only called when becoming primary */
 	public void commitDeliveredMessages(){
 		int timeout = 0;
-		while(!clocksEqual() && (timeout < 10)){
-		Collections.sort(deliveredWriteLog, comparator); // sort for efficiency
-		for(Command command : deliveredWriteLog){
-			if(completeV(committedClock, command.serverId) == command.acceptStamp - 1){  // ready to commit
+		while(!VectorClock.compareClocks(tentativeClock, committedClock) && (timeout < 10)){
+			Collections.sort(deliveredWriteLog, comparator); // sort for efficiency
+			for(Command command : deliveredWriteLog){
+				if(completeV(committedClock, command.serverId) == command.acceptStamp - 1){  // ready to commit
 					commit(command);
-			} else{
-				replica.logger.info("can't commit yet...");
+				} else{
+					replica.logger.info("can't commit yet...");
+				}
 			}
-		}
-		timeout++;
+			timeout++;
 		}
 		if(timeout == 10){
 			replica.logger.warning("commitDeliveredMessages tried 10 times and failed to complete!");
@@ -195,6 +195,9 @@ public class Memory {
 
 	/** locate which commands are needed for anti-entropy */
 	HashSet<Command> unseenCommands(VectorClock other){
+		Collections.sort(deliveredWriteLog, comparator);
+		Collections.sort(committedWriteLog, comparator);
+		
 		HashSet<Command> output = new HashSet<Command>();
 		for(Command c : deliveredWriteLog){
 			if(completeV(other.clock, c.serverId) == c.acceptStamp - 1){
@@ -213,23 +216,7 @@ public class Memory {
 	
 	
 	// below are methods for testing
-	
-	/** compare vector clocks, for error-checking only */
-	private boolean clocksEqual(){
-		for(String s : tentativeClock.keySet()){
-			if(completeV(committedClock,s) < tentativeClock.get(s)){
-				return false;
-			}
-		}
-		for(String s : committedClock.keySet()){
-			if(completeV(tentativeClock,s) < committedClock.get(s)){
-				replica.logger.warning("commit clock higher than tentative clock");
-				return false;
-			}
-		}
-		return true;
-	}
-	
+
 	public void printLogs(){
 		System.out.println("---- undelivered messages:");
 		for(Command c : undeliveredWriteLog){

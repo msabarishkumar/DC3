@@ -1,17 +1,16 @@
 package replica;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 public class VectorClock {
-
+	
 	public final HashMap<String, Long> clock;
 	public final HashMap<String, Long> committedclock;
 	
-	public static final String tuplesep = "::";
-	public static final String entrysep = ":=:";
-	public static final String listsep  = "~=~";
+	public static final String tuplesep = "=";
+	public static final String entrysep = ":";
+	public static final String listsep  = "~~";
 	
 	public VectorClock(HashMap<String, Long> clock, HashMap<String, Long> committedclock){
 		this.clock = new HashMap<String, Long>(clock);
@@ -56,17 +55,27 @@ public class VectorClock {
 			build.append(entry.getValue());
 			build.append(entrysep);
 		}
-		//build.replace(build.lastIndexOf(entrysep),build.length(),"");
 		return build.toString();
 	}
 	
-	/*
-	public HashSet<Command> missingEntries(VectorClock other){
-		for(String name: clock.keySet()){
-			if(other.clock.containsKey(name)){
-				for(int i = other.clock.get(name)+1; i <= clock.get(name); i++){
-				}
+	/** returns true if set2 contains (or did contain) everything set1 contained */
+	static boolean compareClocks(HashMap<String, Long> set1, HashMap<String, Long> set2){
+		for(String s : set1.keySet()){
+			if(Memory.completeV(set2,s) < set1.get(s)){
+				return false;
 			}
 		}
-	} */
+		for(String s : set2.keySet()){
+			if(Memory.completeV(set1,s) == Integer.MAX_VALUE){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/** returns true if clock2 contains (or did contain) everything this clock contains */
+	boolean compareTo(VectorClock clock2){
+		return compareClocks(this.clock, clock2.clock) &&
+					compareClocks(this.committedclock, clock2.committedclock);
+	}
 }

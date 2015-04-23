@@ -85,6 +85,11 @@ public class NetController {
 		
 		// temporary, for sans-client instructions
 		connect("myself",myPort);
+		
+		// needed, will never get a JOIN message from "0"
+		if(!processId.equals("0")){
+			connect("0",5000);
+		}
 	}
 	
 	// Establish outgoing connection to a process.
@@ -127,14 +132,13 @@ public class NetController {
 		logger.info("   sending "+msg);
 		sendMsg(chosenServer, msg);
 	}
-	
-	/** so servers can send to those whose "name" they do not know, for instance when first joining */
-	//public synchronized boolean sendMsgToPort(int port, String msg){
-	//	connect(NamingProtocol.uniqueName(port), port);
-	//	return sendMsg(NamingProtocol.uniqueName(port), msg);
-	//}
+
 	
 	public synchronized boolean sendMsg(String process, String msg) {
+		if(disconnectedNodes.contains(process)){
+			logger.info("Tried to send message to "+ process + ", but currently disconnected");
+			return false;
+		}
 		logger.info("Sending Message to " + process + ":	" + msg);
 		try {
 			if (outSockets.get(process) == null)

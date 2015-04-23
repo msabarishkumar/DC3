@@ -25,7 +25,7 @@ public class Replica {
 	final Queue<InputPacket> queue;
 
 	// This is the container which would have data about all the commands stored.
-	final CommandLog cmds;
+	//final CommandLog cmds;
 	
 	// This is where we maintain all the play lists.
 	static final Playlist playlist = new Playlist();
@@ -44,6 +44,9 @@ public class Replica {
 	// requests for more retires.
 	//String parentRetiringProcessId;
 	
+	// if true, the server refuses any write requests and shuts down when it is safe to
+	public boolean retiring;
+	
 	public static boolean isIsolated;
 	
 	Memory memory;
@@ -60,7 +63,7 @@ public class Replica {
 			processId = NamingProtocol.defaultName;
 		}
 		
-		this.cmds = new CommandLog(processId);
+		//this.cmds = new CommandLog(processId);
 		
 		String directory = System.getProperty("user.dir");
 		if (directory.substring(directory.length() - 4).equals("/bin")){
@@ -96,6 +99,10 @@ public class Replica {
 								logger.info("cannot perform operation, because I have not been named");
 								break;
 							}
+							if(retiring){
+								logger.info("Cannot perform operation, am retiring");
+								break;
+							}
 							Operation op = Operation.operationFromString(message.payLoad);
 							Command command = new Command(-1, memory.myNextCommand(), processId, op);
 							memory.acceptCommand(command);
@@ -107,7 +114,15 @@ public class Replica {
 							break;
 							
 						case ENTROPY_REQUEST:
+							memory.checkUndeliveredMessages();
 							VectorClock receivedClock = new VectorClock(message.payLoad);
+							//if(retiring){
+							//	VectorClock myClock = new VectorClock(memory.tentativeClock, memory.committedClock);
+							//	if(myClock.compareTo(receivedClock)){    // other server has seen everything you've seen
+							//		// TODO: actually shut down
+							//		System.exit(1);
+							//	}
+							//}
 							Set<Command> allcommands = memory.unseenCommands(receivedClock);
 							for(Command commandToSend : allcommands){
 								Message msgToSend = new Message(processId, MessageType.ENTROPY_COMMAND, commandToSend.toString());
@@ -120,7 +135,7 @@ public class Replica {
 							break;
 
 						case READ: 
-							  // client stuff
+							  // TODO: client stuff
 							String url = playlist.read(message.payLoad);
 							  // send to client
 							
@@ -144,6 +159,10 @@ public class Replica {
 								logger.warning("Received JOIN, but have no name myself so can do nothing");
 								break;
 							}
+							if(retiring){
+								logger.warning("Received JOIN, but am retiring");
+								break;
+							}
 							if(!joinop.process_id.equals(NamingProtocol.defaultName)){
 								logger.warning("Received JOIN from already-named server");
 								break;
@@ -160,18 +179,28 @@ public class Replica {
 						case NAME:     // you have a name now
 							logger.info("Have been named: "+message.payLoad);
 							processId = message.payLoad;
+							memory.tentativeClock.put(processId, (long) 0);
+
 							// you now know the other server's Bayou name as well...
+							if(controller.ports.containsKey(NamingProtocol.referralName)){
 							controller.outSockets.put(message.process_id, controller.outSockets.get(NamingProtocol.referralName));
 							controller.outSockets.remove(NamingProtocol.referralName);
 							controller.ports.put(message.process_id, controller.ports.get(NamingProtocol.referralName));
 							controller.ports.remove(NamingProtocol.referralName);
+							}
 							logger.info("done naming");
+							antiEntropy();
 							break;
 							
-						case STOP_RETIRING:
-						case STOP_RETIRING_REJECTED:
-						case STOP_RETIRING_APPROVED: 
-						case SET_FREE: 
+						//case RETIRE_REQUEST:
+						//	memory.checkUndeliveredMessages();
+						//	VectorClock mycurrentclock = new VectorClock(memory.tentativeClock, memory.committedClock);
+						//	Message msgResponse = new Message(processId, MessageType.ENTROPY_REQUEST,mycurrentclock.toString());
+						//	controller.sendMsgToRandom(msgResponse.toString());
+							
+						case RETIRE_OK:
+							/// TODO: inform master that you're done
+							System.exit(1);
 					}
 				}
 			}
@@ -200,8 +229,13 @@ public class Replica {
 		Operation op = new AddRetireOperation(OperationType.ADD_NODE,
 				NamingProtocol.defaultName, "localhost", ""+portNum);
 		Message msgToSend = new Message(NamingProtocol.defaultName, MessageType.JOIN, op.toString());
-		controller.connect(NamingProtocol.referralName, referralPort);
-		controller.sendMsg(NamingProtocol.referralName, msgToSend.toString());
+		if(referralPort == 5000){    // you're asking Mr. 0
+			controller.sendMsg("0", msgToSend.toString());
+		}
+		else{           // asking someone else, must use a temporary name until you learn their name
+			controller.connect(NamingProtocol.referralName, referralPort);
+			controller.sendMsg(NamingProtocol.referralName, msgToSend.toString());
+		}
 	}
 	
 	/** writes to play list, called from Memory */
@@ -215,6 +249,7 @@ public class Replica {
 			playlist.performOperation(op);
 		} catch (SongNotFoundException e) {
 			e.printStackTrace();
+			logger.info("problem in playlist");
 		}
 	}
 	
@@ -222,13 +257,24 @@ public class Replica {
 	private void performAddRetireOp(AddRetireOperation op){
 		switch (op.type){
 		case ADD_NODE:
+			if (op.process_id.equals(processId))   // I already know that I've joined
+				break;
 			controller.connect(op.process_id, Integer.parseInt(op.port));
 			memory.tentativeClock.put(op.process_id, (long) 0);
 			break;
 		case RETIRE_NODE:
-			/// TODO: inform master that you received retirement message!
-			controller.disconnect(op.process_id);
 			memory.tentativeClock.remove(op.process_id);
+			if(op.process_id.equals(processId)){
+				// sent to myself
+				if(memory.tentativeClock.isEmpty()){   // I was the only server left
+					System.exit(1);
+				}
+			}
+			else{
+				logger.info("Acknowledging retirement of "+op.process_id);
+				controller.sendMsg(op.process_id, new Message(processId, MessageType.RETIRE_OK,"a").toString());
+				controller.disconnect(op.process_id);
+			}
 			break;
 		default: logger.info("ran performAddRetireOp on wrong operation: "+op.type);
 		}
@@ -261,15 +307,13 @@ public class Replica {
 		Operation op = new AddRetireOperation(OperationType.RETIRE_NODE,processId,"localhost",""+portNum);
 		Command command = new Command(-1, memory.myNextCommand(), processId, op);
 		memory.acceptCommand(command);
-		// 
-		//entropy()
 		if(isPrimary){
 			logger.info("Passing primary status");
 			Message msgToSend = new Message("",MessageType.BECOME_PRIMARY,"blablabla");
 			controller.sendMsgToRandom(msgToSend.toString());   // someone else becomes primary, doesn't matter who
 		}
-		logger.info("Shutting down");
-		// TODO: actually shut down
+		logger.info("Retiring at next opportunity");
+		retiring = true;
 	}
 	
 	private void antiEntropy(){
@@ -286,8 +330,8 @@ public class Replica {
 			
 			if(inputline.equals("retire")){
 				retire();
-				sc.close();
-				return;
+				//sc.close();
+				//return;
 			}
 			else if(inputline.equals("print")){
 				memory.printClocks();
