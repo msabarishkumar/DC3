@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class VectorClock {
+	/// replaced by VectorClock2
+	/// will be deleted next commit, unless needed for something
 	
 	public final HashMap<String, Long> clock;
 	public final HashMap<String, Long> committedclock;
@@ -11,6 +13,11 @@ public class VectorClock {
 	public static final String tuplesep = "=";
 	public static final String entrysep = ":";
 	public static final String listsep  = "~~";
+	
+	public VectorClock(){
+		this.clock = new HashMap<String, Long>();
+		this.committedclock = new HashMap<String, Long>();
+	}
 	
 	public VectorClock(HashMap<String, Long> clock, HashMap<String, Long> committedclock){
 		this.clock = new HashMap<String, Long>(clock);

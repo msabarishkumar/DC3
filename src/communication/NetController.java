@@ -84,7 +84,7 @@ public class NetController {
 		listener.start();
 		
 		// temporary, for sans-client instructions
-		connect("myself",myPort);
+		connect(NamingProtocol.myself,myPort);
 		
 		// needed, will never get a JOIN message from "0"
 		if(!processId.equals("0")){
@@ -123,7 +123,7 @@ public class NetController {
 	public synchronized void sendMsgToRandom(String msg){
 		Set<String> nodes = outSockets.keySet();
 		nodes.removeAll(disconnectedNodes);
-		nodes.remove("myself");
+		nodes.remove(NamingProtocol.myself);
 		Object[] servers = nodes.toArray();
 		int randomindex = new Random().nextInt(servers.length);
 		

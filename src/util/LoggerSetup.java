@@ -46,4 +46,12 @@ public class LoggerSetup {
 		
 		return logger;
 	}
+	
+	public static String defaultLogLocation(){
+		String directory = System.getProperty("user.dir");
+		if (directory.substring(directory.length() - 4).equals("/bin")){
+			directory = directory.substring(0,directory.length() - 4);
+		}
+		return directory;
+	}
 }

@@ -63,15 +63,8 @@ public class Replica {
 			processId = NamingProtocol.defaultName;
 		}
 		
-		//this.cmds = new CommandLog(processId);
-		
-		String directory = System.getProperty("user.dir");
-		if (directory.substring(directory.length() - 4).equals("/bin")){
-			directory = directory.substring(0,directory.length() - 4);
-		}
-		
 		try {
-			logger = LoggerSetup.create(directory + "/logs/" + uniqueId + ".log");	
+			logger = LoggerSetup.create(LoggerSetup.defaultLogLocation() + "/logs/" + uniqueId + ".log");	
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -95,17 +88,24 @@ public class Replica {
 
 					switch (message.type) {
 						case OPERATION:
+							MessageWithClock opmess = new MessageWithClock(message.payLoad);
 							if(processId.equals(NamingProtocol.defaultName)){
-								logger.info("cannot perform operation, because I have not been named");
-								break;
+								logger.info("cannot perform operation, because I have not been named yet");
 							}
-							if(retiring){
+							else if(retiring){
 								logger.info("Cannot perform operation, am retiring");
-								break;
 							}
-							Operation op = Operation.operationFromString(message.payLoad);
-							Command command = new Command(-1, memory.myNextCommand(), processId, op);
-							memory.acceptCommand(command);
+							else if(!memory.clientDependencyCheck(opmess)){
+								logger.info("Can't write " + opmess.message + ", dependency issue");
+							}
+							else{    // free to write
+								Operation op = Operation.operationFromString(opmess.message);
+								Command command = new Command(-1, memory.myNextCommand(), processId, op);
+								memory.acceptCommand(command);
+							}
+							long Wid = memory.myNextCommand() - 1;
+							Message responseMessage = new Message(processId, MessageType.WRITE_RESULT, "" + Wid);
+							controller.sendMsg(message.process_id, responseMessage.toString());
 							break;
 							
 						case BECOME_PRIMARY:
@@ -115,18 +115,11 @@ public class Replica {
 							
 						case ENTROPY_REQUEST:
 							memory.checkUndeliveredMessages();
-							VectorClock receivedClock = new VectorClock(message.payLoad);
-							//if(retiring){
-							//	VectorClock myClock = new VectorClock(memory.tentativeClock, memory.committedClock);
-							//	if(myClock.compareTo(receivedClock)){    // other server has seen everything you've seen
-							//		// TODO: actually shut down
-							//		System.exit(1);
-							//	}
-							//}
-							Set<Command> allcommands = memory.unseenCommands(receivedClock);
+							MessageWithClock receivedClock = new MessageWithClock(message.payLoad);
+							Set<Command> allcommands = memory.unseenCommands(receivedClock.vector, Integer.parseInt(receivedClock.message));
 							for(Command commandToSend : allcommands){
-								Message msgToSend = new Message(processId, MessageType.ENTROPY_COMMAND, commandToSend.toString());
-								controller.sendMsg(message.process_id, msgToSend.toString());
+								Message msgtoSend = new Message(processId, MessageType.ENTROPY_COMMAND, commandToSend.toString());
+								controller.sendMsg(message.process_id, msgtoSend.toString());
 							}
 							break;
 							
@@ -135,21 +128,27 @@ public class Replica {
 							break;
 
 						case READ: 
-							  // TODO: client stuff
-							String url = playlist.read(message.payLoad);
-							  // send to client
-							
-							System.out.println(url);
+							MessageWithClock clientMessage = new MessageWithClock(message.payLoad);
+							String url;
+							if(memory.clientDependencyCheck(clientMessage)){
+								url = playlist.read(clientMessage.message);
+							}
+							else{
+								url = "ERR_DEP";
+							}
+							MessageWithClock response = new MessageWithClock(url,memory.tentativeClock);
+							Message msgtoSend = new Message(processId, MessageType.READ_RESULT, response.toString());
+							controller.sendMsg(message.process_id, msgtoSend.toString());
 							break;
 							
 						case DISCONNECT: 
 							controller.disconnect(message.payLoad);
 							break;
 							
-						case CONNECT:
-							String id = message.payLoad.substring(3);
-							int port = Integer.parseInt( message.payLoad.substring(0,3) );
-							controller.connect(id, port);
+						case CONNECT:    /// currently used for client connection only
+							//String id = message.payLoad.substring(3);
+							int port = Integer.parseInt( message.payLoad );
+							controller.connect(message.process_id, port);
 							break;
 							
 						case JOIN:
@@ -199,8 +198,16 @@ public class Replica {
 						//	controller.sendMsgToRandom(msgResponse.toString());
 							
 						case RETIRE_OK:
-							/// TODO: inform master that you're done
+							if(isPrimary){
+								logger.info("Passing primary status");
+								Message msgToSend = new Message("",MessageType.BECOME_PRIMARY,"a");
+								controller.sendMsg(message.process_id, msgToSend.toString());
+								// someone else becomes primary, doesn't matter who
+							}
 							System.exit(1);
+							
+						default:
+							logger.warning("received client-side message");
 					}
 				}
 			}
@@ -244,7 +251,6 @@ public class Replica {
 			performAddRetireOp( (AddRetireOperation) op);
 			return;
 		}		
-		// TODO: check client conditions
 		try {
 			playlist.performOperation(op);
 		} catch (SongNotFoundException e) {
@@ -267,7 +273,11 @@ public class Replica {
 			if(op.process_id.equals(processId)){
 				// sent to myself
 				if(memory.tentativeClock.isEmpty()){   // I was the only server left
+					logger.info("only server left and retiring, shutting down");
 					System.exit(1);
+				}
+				else{
+					System.out.println(""+memory.tentativeClock.size()+"nodes left");
 				}
 			}
 			else{
@@ -290,9 +300,6 @@ public class Replica {
 			else if(addop.type == OperationType.RETIRE_NODE){
 				memory.committedClock.remove(addop.process_id);
 			}
-			else{
-				logger.info("ran performAddRetireOp on wrong operation: "+addop.type);
-			}
 		}
 		else{
 			try {
@@ -307,18 +314,13 @@ public class Replica {
 		Operation op = new AddRetireOperation(OperationType.RETIRE_NODE,processId,"localhost",""+portNum);
 		Command command = new Command(-1, memory.myNextCommand(), processId, op);
 		memory.acceptCommand(command);
-		if(isPrimary){
-			logger.info("Passing primary status");
-			Message msgToSend = new Message("",MessageType.BECOME_PRIMARY,"blablabla");
-			controller.sendMsgToRandom(msgToSend.toString());   // someone else becomes primary, doesn't matter who
-		}
 		logger.info("Retiring at next opportunity");
 		retiring = true;
 	}
 	
 	private void antiEntropy(){
-		VectorClock mycurrentclock = new VectorClock(memory.tentativeClock, memory.committedClock);
-		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,mycurrentclock.toString());
+		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
+		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString());
 		controller.sendMsgToRandom(msg.toString());
 	}
 	
@@ -340,8 +342,11 @@ public class Replica {
 			else if(inputline.equals("entropy")){
 				antiEntropy();
 			}
+			else if(inputline.equals("check")){
+				memory.checkUndeliveredMessages();
+			}
 			else{
-				controller.sendMsg("myself",inputline);
+				controller.sendMsg(NamingProtocol.myself,inputline);
 			}
 		}
 		sc.close();

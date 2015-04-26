@@ -6,11 +6,9 @@ public class AddRetireOperation extends Operation {
 	String host;
 	String port;
 	
-	public AddRetireOperation() {
-		
-	}
 	
 	public AddRetireOperation(OperationType type, String process_id, String host, String port) {
+		super(null,null,null);
 		this.type = type;
 		this.process_id = process_id;
 		this.host = host;
@@ -18,19 +16,21 @@ public class AddRetireOperation extends Operation {
 	}
 	
 	public static Operation operationFromString(String str) {
-		AddRetireOperation op = new AddRetireOperation();
+		AddRetireOperation op;
 		String[] strSplit = str.split(Operation.SEPARATOR);
 		
-		OperationType type = OperationType.valueOf(strSplit[0]);
-		if (!(type == OperationType.ADD_NODE || type == OperationType.RETIRE_NODE)) {
+		OperationType optype = OperationType.valueOf(strSplit[0]);
+		if (!(optype == OperationType.ADD_NODE || optype == OperationType.RETIRE_NODE)) {
 			return Operation.operationFromString(str);
 		}
-		op.type = type;
-		op.process_id = strSplit[1];
+		String opprocess_id = strSplit[1];
 		
-		if (type == OperationType.ADD_NODE) {
-			op.host = strSplit[2];
-			op.port = strSplit[3];
+		if (optype == OperationType.ADD_NODE) {
+			String ophost = strSplit[2];
+			String opport = strSplit[3];
+			op = new AddRetireOperation(optype,opprocess_id, ophost, opport);
+		} else{
+			op = new AddRetireOperation(optype,opprocess_id,null,null);
 		}
 		
 		return op;

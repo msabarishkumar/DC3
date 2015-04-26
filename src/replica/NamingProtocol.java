@@ -6,8 +6,10 @@ import java.util.Map;
 public class NamingProtocol {
 	
 	public static final String defaultName = "defaultName";
-	
 	public static final String referralName = "referralName";
+	public static final String myself = "myself";
+	public static final String serverName = "serverName";
+	public static final String clientName = "clientName";
 	
 	private static final String sep = ",";
 	

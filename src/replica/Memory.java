@@ -106,9 +106,9 @@ public class Memory {
 		//uncommitted message
 		if(completeV(tentativeClock, command.serverId) == command.acceptStamp - 1){  // ready to perform
 			replica.logger.info("Performing: "+command.toString());
-			replica.performOperation(command.operation);
 			deliveredWriteLog.add(command);
 			tentativeClock.put(command.serverId, command.acceptStamp);
+			replica.performOperation(command.operation);
 			if(Replica.isPrimary){    // make a committed version
 				commit(command);
 			}
@@ -138,7 +138,7 @@ public class Memory {
 	/** commit all uncommitted messages, only called when becoming primary */
 	public void commitDeliveredMessages(){
 		int timeout = 0;
-		while(!VectorClock.compareClocks(tentativeClock, committedClock) && (timeout < 10)){
+		while(!VectorClock2.compareClocks(tentativeClock, committedClock) && (timeout < 10)){
 			Collections.sort(deliveredWriteLog, comparator); // sort for efficiency
 			for(Command command : deliveredWriteLog){
 				if(completeV(committedClock, command.serverId) == command.acceptStamp - 1){  // ready to commit
@@ -154,7 +154,8 @@ public class Memory {
 		}
 	}
 	
-	/** remove elements for writeLog if they have been committed */
+	/** remove elements from unstable log if they have been committed
+	 *  will probably only be used for printing */
 	public void garbageCollect(){
 		List<Command> logClone = new LinkedList<Command>(deliveredWriteLog);
 		deliveredWriteLog.clear();
@@ -165,7 +166,7 @@ public class Memory {
 		}
 	}
 	
-	/** only called by primary */
+	/** commit commands, only called by primary */
 	private void commit(Command c){
 		Command command = new Command(csn, c.acceptStamp, c.serverId,c.operation);
 		replica.logger.info("As primary, creating: "+command.toString());
@@ -194,6 +195,7 @@ public class Memory {
 	}
 
 	/** locate which commands are needed for anti-entropy */
+	/*
 	HashSet<Command> unseenCommands(VectorClock other){
 		Collections.sort(deliveredWriteLog, comparator);
 		Collections.sort(committedWriteLog, comparator);
@@ -212,6 +214,30 @@ public class Memory {
 			}
 		}
 		return output;
+	} */
+	
+	/** locate which commands are needed for anti-entropy */
+	HashSet<Command> unseenCommands(VectorClock2 other, int otherCSN){
+		Collections.sort(deliveredWriteLog, comparator);
+		Collections.sort(committedWriteLog, comparator);
+		
+		HashSet<Command> output = new HashSet<Command>();
+		for(Command c : deliveredWriteLog){
+			if(completeV(other.clock, c.serverId) == c.acceptStamp - 1){
+				output.add(c);
+				other.clock.put(c.serverId, c.acceptStamp);
+			}
+		}
+		for(Command c : committedWriteLog){
+			if(c.CSN >= otherCSN){
+				output.add(c);
+			}
+		}
+		return output;
+	}
+	
+	boolean clientDependencyCheck(MessageWithClock message){
+		return VectorClock2.compareClocks(message.vector.clock, tentativeClock);
 	}
 	
 	

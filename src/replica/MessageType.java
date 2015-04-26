@@ -2,13 +2,13 @@ package replica;
 
 public enum MessageType {
 	// Messages that define valid Operations, from Client
-	OPERATION,
+	OPERATION, WRITE_RESULT,
 	
 	// Entropy.
 	ENTROPY_REQUEST, ENTROPY_COMMAND,
 	
 	// Read.
-	READ,
+	READ, READ_RESULT,
 	
 	// DISCONNECT and CONNECT.
 	DISCONNECT,

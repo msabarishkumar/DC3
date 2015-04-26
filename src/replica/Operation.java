@@ -10,18 +10,25 @@ public class Operation implements Serializable {
 	String song;
 	String url;
 	
+	public Operation(OperationType type, String song, String url){
+		this.type = type;
+		this.song = song;
+		this.url = url;
+	}
+	
 	public static Operation operationFromString(String str) {
-		Operation op = new Operation();
 		String[] strSplit = str.split(Operation.SEPARATOR);
 		
-		OperationType type = OperationType.valueOf(strSplit[0]);
-		op.type = type;
-		op.song = strSplit[1];
-		
-		if (type == OperationType.PUT) {
-			op.url = strSplit[2];
+		OperationType optype = OperationType.valueOf(strSplit[0]);
+		String opsong = strSplit[1];
+		String opurl;
+		if (optype == OperationType.PUT) {
+			opurl = strSplit[2];
+		} else {
+			opurl = null;
 		}
 		
+		Operation op = new Operation(optype,opsong,opurl);
 		return op;
 	}
 	
