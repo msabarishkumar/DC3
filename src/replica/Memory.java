@@ -14,7 +14,7 @@ public class Memory {
 	public static void main(String[] args){
 		String name = "o";
 		String name2  = "<3,o>";
-		Replica rex = new Replica(0);
+		Replica rex = new Replica(1);
 		Memory me = rex.memory;
 		
 		Operation op1 = Operation.operationFromString("PUT==lo==hi");
@@ -25,6 +25,8 @@ public class Memory {
 		Command c3 = new Command(-1, 3, name, op3);
 		Operation op4 = Operation.operationFromString("PUT==med==sand");
 		Command c4 = new Command(-1, 1, name2, op4);
+		
+		Command c5 = new Command(0,1,name,op1);
 		
 		me.tentativeClock.put("o", (long) 0);
 		me.committedClock.put("o", (long) 0);
@@ -43,27 +45,18 @@ public class Memory {
 		System.out.println(rex.playlist.toString());
 		System.out.println(rex.committedPlaylist.toString());
 		
-		me.acceptCommand(c4);
+		me.acceptCommand(c5);
 		me.printLogs();
 		me.printClocks();
 		System.out.println(rex.playlist.toString());
 		System.out.println(rex.committedPlaylist.toString());
 		
-		me.acceptCommand(c3);
-		me.checkUndeliveredMessages();
-		me.garbageCollect();
+		me.buildPlaylist();
 		me.printLogs();
 		me.printClocks();
 		System.out.println(rex.playlist.toString());
 		System.out.println(rex.committedPlaylist.toString());
-		
-		rex.isPrimary = true;
-		me.commitDeliveredMessages();
-		me.garbageCollect();
-		me.printLogs();
-		me.printClocks();
-		System.out.println(rex.playlist.toString());
-		System.out.println(rex.committedPlaylist.toString());
+		me.pLog.print();
 	}
 	
 	
@@ -72,6 +65,7 @@ public class Memory {
 	public List<Command> committedWriteLog = new ArrayList<Command>();
 	public List<Command> deliveredWriteLog = new LinkedList<Command>();
 	public List<Command> undeliveredWriteLog = new LinkedList<Command>();
+	public PrintLog pLog = new PrintLog();
 	public int csn = 0;
 	
 	public Replica replica;
@@ -90,6 +84,7 @@ public class Memory {
 			replica.logger.info("Committing: "+command.toString());
 			committedClock.put(command.serverId, command.acceptStamp);
 			committedWriteLog.add(csn, command);
+			pLog.add(command);
 			csn++;
 			return true;
 		}
@@ -109,6 +104,7 @@ public class Memory {
 			deliveredWriteLog.add(command);
 			tentativeClock.put(command.serverId, command.acceptStamp);
 			replica.performOperation(command.operation);
+			pLog.add(command);
 			if(Replica.isPrimary){    // make a committed version
 				commit(command);
 			}
@@ -138,7 +134,7 @@ public class Memory {
 	/** commit all uncommitted messages, only called when becoming primary */
 	public void commitDeliveredMessages(){
 		int timeout = 0;
-		while(!VectorClock2.compareClocks(tentativeClock, committedClock) && (timeout < 10)){
+		while(!VectorClock.compareClocks(tentativeClock, committedClock) && (timeout < 10)){
 			Collections.sort(deliveredWriteLog, comparator); // sort for efficiency
 			for(Command command : deliveredWriteLog){
 				if(completeV(committedClock, command.serverId) == command.acceptStamp - 1){  // ready to commit
@@ -154,8 +150,8 @@ public class Memory {
 		}
 	}
 	
-	/** remove elements from unstable log if they have been committed
-	 *  will probably only be used for printing */
+	/** remove elements from tentative log if they have been committed
+	 *  dangerous if not all commands have been seen by everyone, only use during stabilization */
 	public void garbageCollect(){
 		List<Command> logClone = new LinkedList<Command>(deliveredWriteLog);
 		deliveredWriteLog.clear();
@@ -193,31 +189,9 @@ public class Memory {
 	long myNextCommand(){
 		return tentativeClock.get(replica.processId)+1;
 	}
-
-	/** locate which commands are needed for anti-entropy */
-	/*
-	HashSet<Command> unseenCommands(VectorClock other){
-		Collections.sort(deliveredWriteLog, comparator);
-		Collections.sort(committedWriteLog, comparator);
-		
-		HashSet<Command> output = new HashSet<Command>();
-		for(Command c : deliveredWriteLog){
-			if(completeV(other.clock, c.serverId) == c.acceptStamp - 1){
-				output.add(c);
-				other.clock.put(c.serverId, c.acceptStamp);
-			}
-		}
-		for(Command c : committedWriteLog){
-			if(completeV(other.committedclock, c.serverId) < c.acceptStamp){
-				output.add(c);
-				other.committedclock.put(c.serverId, c.acceptStamp);
-			}
-		}
-		return output;
-	} */
 	
 	/** locate which commands are needed for anti-entropy */
-	HashSet<Command> unseenCommands(VectorClock2 other, int otherCSN){
+	HashSet<Command> unseenCommands(VectorClock other, int otherCSN){
 		Collections.sort(deliveredWriteLog, comparator);
 		Collections.sort(committedWriteLog, comparator);
 		
@@ -236,8 +210,20 @@ public class Memory {
 		return output;
 	}
 	
+	/** Compare client's current VC to yours*/
 	boolean clientDependencyCheck(MessageWithClock message){
-		return VectorClock2.compareClocks(message.vector.clock, tentativeClock);
+		return VectorClock.compareClocks(message.vector.clock, tentativeClock);
+	}
+	
+	/** recreates play list in a set order, so that everyone's is eventually the same */
+	void buildPlaylist(){
+		garbageCollect(); // remove commands that were already used on CommittedPlaylist
+		Collections.sort(deliveredWriteLog, comparator);
+		// if all commands have been seen by all servers, then sorted command set should be the same
+		replica.playlist = replica.committedPlaylist.clone();
+		for(Command c : deliveredWriteLog){
+			replica.playlist.performOperation(c.operation);
+		}
 	}
 	
 	
@@ -268,4 +254,5 @@ public class Memory {
 			System.out.println(s + " = "+ committedClock.get(s));
 		}
 	}
+	
 }

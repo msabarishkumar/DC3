@@ -8,7 +8,7 @@ public class Playlist {
 	public Playlist() {
 	}
 	
-	public void performOperation(Operation op) throws SongNotFoundException {
+	public void performOperation(Operation op){
 		switch (op.type) {
 			case PUT:
 				add(op.song, op.url);
@@ -22,13 +22,17 @@ public class Playlist {
 		this.playList.put(song, url);
 	}
 	
-	public synchronized void delete(String song) throws SongNotFoundException {
+	/*public synchronized void delete(String song) throws SongNotFoundException {
 		if (this.playList.containsKey(song)) {
 			this.playList.remove(song);
 			return;
 		}
 		
 		throw new SongNotFoundException("Could not find song: " + song);
+	} */
+	
+	public synchronized void delete(String song){
+		this.playList.remove(song);
 	}
 	
 	public synchronized void edit(String song, String newUrl) throws SongNotFoundException {
@@ -59,6 +63,12 @@ public class Playlist {
 	
 	public void clear() {
 		playList = new Hashtable<String, String>();
+	}
+	
+	public Playlist clone(){
+		Playlist clone = new Playlist();
+		clone.playList = (Hashtable<String, String>) this.playList.clone();
+		return clone;
 	}
 }
 

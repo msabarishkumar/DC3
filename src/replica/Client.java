@@ -1,8 +1,8 @@
 package replica;
 
 import java.util.HashMap;
+
 import java.util.Scanner;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import util.LoggerSetup;
@@ -11,8 +11,8 @@ import util.Queue;
 import communication.NetController;
 
 public class Client {
-
-	private int uniqueId;
+	
+	private String name;
 	
 	private HashMap<String, Long> vector;
 	
@@ -22,27 +22,23 @@ public class Client {
 	
 	private Logger logger;
 	
-	private int basePort = 5000;
+	private static final int basePort = 5000;
 	
 	public Client(int myId, int serverId){
-		uniqueId = myId;
+		name = NamingProtocol.getClientName(myId);
 		
 		try {
-			logger = LoggerSetup.create(LoggerSetup.defaultLogLocation() + "/logs/" + uniqueId + ".log");	
+			logger = LoggerSetup.create(LoggerSetup.defaultLogLocation() + "/logs/" + myId + ".log");	
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		// Start NetController and start receiving messages from other servers.
+		// Start NetController and set up server connection
 		this.queue = new Queue<InputPacket>();
-		controller = new NetController(NamingProtocol.myself, basePort + uniqueId, logger, queue);
+		controller = new NetController(NamingProtocol.myself, basePort + myId, logger, queue);
+		connectToServer(serverId);
 		
-		// connect to server
-		controller.connect(NamingProtocol.serverName, basePort + serverId);
-		int fd = basePort + uniqueId;
-		Message msgToSend = new Message(NamingProtocol.clientName, MessageType.CONNECT, "" + fd);
-		controller.sendMsg(NamingProtocol.serverName, msgToSend.toString());
-		
+		// create vector clock
 		vector = new HashMap<String, Long>();
 		vector.put("0", (long) 0);
 	}
@@ -63,6 +59,10 @@ public class Client {
 				me.logger.info("shutting down cause told to");
 				System.exit(0);
 			}
+			else if(inputline.startsWith("connect")){
+				int port = Integer.parseInt(inputline.substring(7));
+				me.connectToServer(port);
+			}
 			else if(inputline.equals("printclock")){
 				me.printVectors();
 			}
@@ -78,7 +78,22 @@ public class Client {
 		
 	}
 	
+	/** client only connects to one server at a time, but must be able to change the server in question */
+	private void connectToServer(int serverId){
+		String server = NamingProtocol.serverName;
+		if(controller.ports.containsKey(server)){
+			logger.info("Removing connection to port " + controller.ports.get(server));
+			controller.outSockets.get(server).cleanShutdown();
+			controller.ports.remove(server);
+		}
+		logger.info("connecting to server " + serverId);
+		controller.connect(NamingProtocol.serverName, basePort + serverId);
+		Message msgToSend = new Message(name, MessageType.CONNECT, "" + controller.ports.get(NamingProtocol.myself));
+		controller.sendMsg(NamingProtocol.serverName, msgToSend.toString());
+	}
 	
+	/** Receives responses from server
+	 * to update clock and inform master when Write/Read is complete */
 	private void messageThread(){
 		Thread th = new Thread() {
 			public void run() {
@@ -94,7 +109,6 @@ public class Client {
 		};
 		th.start();
 	}
-	
 	private void checkMessage(){
 		InputPacket msgPacket = queue.poll();
 		String msg = msgPacket.msg;
@@ -103,9 +117,9 @@ public class Client {
 
 		switch(message.type){
 		case WRITE_RESULT:
-			long wid = Long.parseLong(message.payLoad);
-			logger.info("Write completed, number "+wid);
-			increment(message.process_id, wid);
+			VectorClock vc = new VectorClock(message.payLoad);
+			logger.info("Write completed");
+			increment(vc.clock);
 			System.out.println("WRITE_FIN");
 			break;
 			
@@ -127,22 +141,22 @@ public class Client {
 		logger.info("Sending "+op);
 		// adding vectors for write guarantees
 		MessageWithClock msg = new MessageWithClock(op, vector);
-		Message msgToSend = new Message(NamingProtocol.clientName, MessageType.OPERATION, msg.toString());
+		Message msgToSend = new Message(name, MessageType.OPERATION, msg.toString());
 		controller.sendMsg(NamingProtocol.serverName, msgToSend.toString());
 	}
 	
 	/** */
-	private void sendRead(String name){
-		logger.info("Requesting "+name);
+	private void sendRead(String song){
+		logger.info("Requesting "+song);
 		// adding vectors for read guarantees
-		MessageWithClock msg = new MessageWithClock(name, vector);
-		Message msgToSend = new Message(NamingProtocol.clientName, MessageType.READ, msg.toString());
+		MessageWithClock msg = new MessageWithClock(song, vector);
+		Message msgToSend = new Message(name, MessageType.READ, msg.toString());
 		controller.sendMsg(NamingProtocol.serverName, msgToSend.toString());
 	}
 	
 	/** take MAX(thisclock, otherclock) or increment single server */
 	private void increment(String server, long number){
-		if(Memory.completeV(vector, server) < number){
+		if(!vector.containsKey(server)  || vector.get(server) < number){
 			vector.put(server, number);
 		}
 	}

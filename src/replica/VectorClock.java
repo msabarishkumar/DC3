@@ -4,45 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class VectorClock {
-	/// replaced by VectorClock2
-	/// will be deleted next commit, unless needed for something
 	
 	public final HashMap<String, Long> clock;
-	public final HashMap<String, Long> committedclock;
 	
 	public static final String tuplesep = "=";
 	public static final String entrysep = ":";
-	public static final String listsep  = "~~";
 	
 	public VectorClock(){
 		this.clock = new HashMap<String, Long>();
-		this.committedclock = new HashMap<String, Long>();
 	}
 	
-	public VectorClock(HashMap<String, Long> clock, HashMap<String, Long> committedclock){
+	public VectorClock(HashMap<String, Long> clock){
 		this.clock = new HashMap<String, Long>(clock);
-		this.committedclock = new HashMap<String, Long>(committedclock);
 	}
 	
 	public VectorClock(String all){
 		this.clock = new HashMap<String, Long>();
-		this.committedclock = new HashMap<String, Long>();
-		
-		String[] ff = all.split(listsep);
-		if(ff.length > 0){
-			String normalClock = ff[0];
-			for(String entry : normalClock.split(entrysep)){
-				if(!entry.isEmpty()){
-					clock.put(entry.split(tuplesep)[0],Long.parseLong(entry.split(tuplesep)[1]));
-				}
-			}
-		}
-		if(ff.length > 1){
-			String commitClock = ff[1];
-			for(String entry : commitClock.split(entrysep)){
-				if(!entry.isEmpty()){
-					committedclock.put(entry.split(tuplesep)[0],Long.parseLong(entry.split(tuplesep)[1]));
-				}
+		for(String entry : all.split(entrysep)){
+			if(!entry.isEmpty()){
+				clock.put(entry.split(tuplesep)[0],Long.parseLong(entry.split(tuplesep)[1]));
 			}
 		}
 	}
@@ -50,13 +30,6 @@ public class VectorClock {
 	public String toString(){
 		StringBuilder build = new StringBuilder();
 		for(Map.Entry<String, Long> entry : clock.entrySet()){
-			build.append(entry.getKey());
-			build.append(tuplesep);
-			build.append(entry.getValue());
-			build.append(entrysep);
-		}
-		build.append(listsep);
-		for(Map.Entry<String, Long> entry : committedclock.entrySet()){
 			build.append(entry.getKey());
 			build.append(tuplesep);
 			build.append(entry.getValue());
@@ -82,7 +55,6 @@ public class VectorClock {
 	
 	/** returns true if clock2 contains (or did contain) everything this clock contains */
 	boolean compareTo(VectorClock clock2){
-		return compareClocks(this.clock, clock2.clock) &&
-					compareClocks(this.committedclock, clock2.committedclock);
+		return compareClocks(this.clock, clock2.clock);
 	}
 }

@@ -9,7 +9,6 @@ public class NamingProtocol {
 	public static final String referralName = "referralName";
 	public static final String myself = "myself";
 	public static final String serverName = "serverName";
-	public static final String clientName = "clientName";
 	
 	private static final String sep = ",";
 	
@@ -26,15 +25,15 @@ public class NamingProtocol {
 		int split = id.indexOf(sep);
 		return Integer.parseInt(id.substring(1,split));
 	}
-	
-	/*
-	public static String uniqueName(int uniqueId){
-		return "tempName_" + uniqueId;
+
+	public static String getClientName(int uniqueId){
+		return "client"+uniqueId;
 	}
 	
-	public static String uniqueName(String uniqueId){
-		return "tempName_" + uniqueId;
-	} */
+	public static boolean isClientName(String id){
+		return id.startsWith("client");
+	}
+	
 	
 	public static String printNodeNames(Map<String, Integer> nodes){
 		StringBuilder f = new StringBuilder();

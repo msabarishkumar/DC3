@@ -1,6 +1,8 @@
 package replica;
 
+import java.util.HashMap;
 import java.util.Scanner;
+
 import java.util.Set;
 import java.util.logging.Logger;
 import communication.NetController;
@@ -23,26 +25,13 @@ public class Replica {
 	
 	// Event queue for storing all the messages from the wire. This queue would be passed to the NetController.
 	final Queue<InputPacket> queue;
-
-	// This is the container which would have data about all the commands stored.
-	//final CommandLog cmds;
 	
 	// This is where we maintain all the play lists.
-	static final Playlist playlist = new Playlist();
+	static Playlist playlist = new Playlist();
 	static final Playlist committedPlaylist = new Playlist();
 	
 	// Controller instance used to send messages to all the replicas.
 	final NetController controller;
-	
-	//static RetiringState retiringState = RetiringState.NOT_RETIRING;
-	
-	// When we request some nodes to retire, we maintain a count that how
-	// many have replied.
-	//HashMap<String, InetAddress> retireRequestMap;
-	
-	// ProcessId of the server, for which this replica has stopped accepting
-	// requests for more retires.
-	//String parentRetiringProcessId;
 	
 	// if true, the server refuses any write requests and shuts down when it is safe to
 	public boolean retiring;
@@ -74,7 +63,6 @@ public class Replica {
 		// Start NetController and start receiving messages from other servers.
 		this.queue = new Queue<InputPacket>();
 		controller = new NetController(processId, portNum, logger, queue);
-		//controller = null;
 	}
 	
 	public void startReceivingMessages() {
@@ -103,8 +91,7 @@ public class Replica {
 								Command command = new Command(-1, memory.myNextCommand(), processId, op);
 								memory.acceptCommand(command);
 							}
-							long Wid = memory.myNextCommand() - 1;
-							Message responseMessage = new Message(processId, MessageType.WRITE_RESULT, "" + Wid);
+							Message responseMessage = new Message(processId, MessageType.WRITE_RESULT, writeResponse().toString());
 							controller.sendMsg(message.process_id, responseMessage.toString());
 							break;
 							
@@ -146,7 +133,7 @@ public class Replica {
 							break;
 							
 						case CONNECT:    /// currently used for client connection only
-							//String id = message.payLoad.substring(3);
+							logger.info("Connected to client " + message.payLoad);
 							int port = Integer.parseInt( message.payLoad );
 							controller.connect(message.process_id, port);
 							break;
@@ -190,12 +177,6 @@ public class Replica {
 							logger.info("done naming");
 							antiEntropy();
 							break;
-							
-						//case RETIRE_REQUEST:
-						//	memory.checkUndeliveredMessages();
-						//	VectorClock mycurrentclock = new VectorClock(memory.tentativeClock, memory.committedClock);
-						//	Message msgResponse = new Message(processId, MessageType.ENTROPY_REQUEST,mycurrentclock.toString());
-						//	controller.sendMsgToRandom(msgResponse.toString());
 							
 						case RETIRE_OK:
 							if(isPrimary){
@@ -250,13 +231,8 @@ public class Replica {
 		if(op instanceof AddRetireOperation){
 			performAddRetireOp( (AddRetireOperation) op);
 			return;
-		}		
-		try {
-			playlist.performOperation(op);
-		} catch (SongNotFoundException e) {
-			e.printStackTrace();
-			logger.info("problem in playlist");
 		}
+		playlist.performOperation(op);
 	}
 	
 
@@ -302,11 +278,7 @@ public class Replica {
 			}
 		}
 		else{
-			try {
-				committedPlaylist.performOperation(op);
-			} catch (SongNotFoundException e) {
-				e.printStackTrace();
-			}
+			committedPlaylist.performOperation(op);
 		}
 	}
 	
@@ -324,6 +296,13 @@ public class Replica {
 		controller.sendMsgToRandom(msg.toString());
 	}
 	
+	private VectorClock writeResponse(){
+		long Wid = memory.myNextCommand() - 1;
+		HashMap<String, Long> emptyclock = new HashMap<String, Long>();
+		emptyclock.put(processId, Wid);
+		return new VectorClock(emptyclock);
+	}
+	
 	/** takes line input and sends it as a message to itself, to run without client / master interface */
 	private void test(){
 		Scanner sc = new Scanner(System.in);
@@ -332,12 +311,19 @@ public class Replica {
 			
 			if(inputline.equals("retire")){
 				retire();
-				//sc.close();
-				//return;
 			}
 			else if(inputline.equals("print")){
 				memory.printClocks();
 				memory.printLogs();
+			}
+			else if(inputline.equals("rebuild")){
+				memory.buildPlaylist();
+			}
+			else if(inputline.equals("printlog")){
+				memory.pLog.print();
+			}
+			else if(inputline.equals("printlist")){
+				System.out.println(playlist.toString());
 			}
 			else if(inputline.equals("entropy")){
 				antiEntropy();

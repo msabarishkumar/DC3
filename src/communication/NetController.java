@@ -12,6 +12,7 @@
 package communication;
 
 import java.io.IOException;
+
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -28,7 +29,6 @@ import java.util.logging.Logger;
 
 import replica.InputPacket;
 import replica.NamingProtocol;
-import replica.Replica;
 import util.Queue;
 
 /**
@@ -47,25 +47,8 @@ public class NetController {
 	private final List<IncomingSock> inSockets;
 	public final HashMap<String, OutgoingSock> outSockets;
 	public final Set<String> disconnectedNodes = new HashSet<String>();
+	public final Set<String> clientNodes = new HashSet<String>();
 	private final ListenServer listener;
-	
-	/*
-	public NetController(String processId, Config config, Queue<InputPacket> queue) {
-		this.config = config;
-		this.procNum = processId;
-		addresses = config.addresses;
-		ports = config.ports;
-		
-		inSockets = Collections.synchronizedList(new ArrayList<IncomingSock>());
-		outSockets = new HashMap<String, OutgoingSock>();
-		
-		for (String process: config.addresses.keySet()) {
-			outSockets.put(process, null);
-		}
-
-		listener = new ListenServer(config, inSockets, queue);
-		listener.start();
-	}*/
 	
 	public NetController(String processId, int myPort, Logger logger, Queue<InputPacket> queue){
 		this.logger = logger;
@@ -74,8 +57,6 @@ public class NetController {
 			address = InetAddress.getByName("localhost");
 		} catch (UnknownHostException e) { e.printStackTrace();}
 		ports = new HashMap<String, Integer>();
-		
-		//ports.put(procNum, myPort);
 		
 		inSockets = Collections.synchronizedList(new ArrayList<IncomingSock>());
 		outSockets = new HashMap<String, OutgoingSock>();
@@ -123,6 +104,7 @@ public class NetController {
 	public synchronized void sendMsgToRandom(String msg){
 		Set<String> nodes = outSockets.keySet();
 		nodes.removeAll(disconnectedNodes);
+		nodes.removeAll(clientNodes);
 		nodes.remove(NamingProtocol.myself);
 		Object[] servers = nodes.toArray();
 		int randomindex = new Random().nextInt(servers.length);
@@ -234,6 +216,10 @@ public class NetController {
 			try {
 				initOutgoingConn(nodeToConnect);
 			} catch (IOException e) { e.printStackTrace(); }
+			
+			if(NamingProtocol.isClientName(nodeToConnect)){
+				clientNodes.add(nodeToConnect);
+			}
 		}
 	}
 	
@@ -243,6 +229,18 @@ public class NetController {
 		}
 		outSockets.clear();
 	}
+	
+	/*  awkward case of client changing the server it is connected to 
+	public void clientChangeServer(int newport){
+		outSockets.get(NamingProtocol.serverName).cleanShutdown();
+		ports.put(NamingProtocol.serverName, newport);
+		outSockets.put(NamingProtocol.serverName, null);
+		try {
+			initOutgoingConn(NamingProtocol.serverName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}*/
 	
 	/*
 	public void connectAll() {
