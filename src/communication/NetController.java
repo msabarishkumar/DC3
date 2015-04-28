@@ -66,11 +66,6 @@ public class NetController {
 		
 		// temporary, for sans-client instructions
 		connect(NamingProtocol.myself,myPort);
-		
-		// needed, will never get a JOIN message from "0"
-		if(!processId.equals("0")){
-			connect("0",5000);
-		}
 	}
 	
 	// Establish outgoing connection to a process.

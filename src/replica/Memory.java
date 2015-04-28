@@ -14,7 +14,7 @@ public class Memory {
 	public static void main(String[] args){
 		String name = "o";
 		String name2  = "<3,o>";
-		Replica rex = new Replica(1);
+		Replica rex = new Replica(1,false);
 		Memory me = rex.memory;
 		
 		Operation op1 = Operation.operationFromString("PUT==lo==hi");

@@ -36,15 +36,15 @@ public class Replica {
 	// if true, the server refuses any write requests and shuts down when it is safe to
 	public boolean retiring;
 	
-	public static boolean isIsolated;
+	public static final int basePort = 5000;
 	
 	Memory memory;
 	
-	public Replica(int uniqueId) {
+	public Replica(int uniqueId, boolean firstServer) {
 		
-		this.portNum = 5000 + uniqueId;
+		this.portNum = basePort + uniqueId;
 		
-		if(uniqueId == 0){  // you are the first of your kind
+		if(firstServer){  // you are the first of your kind
 			processId = "0";
 			isPrimary = true;
 		}
@@ -199,9 +199,14 @@ public class Replica {
 	
 	
 	public static void main(String[] args) {
-		Replica replica = new Replica(Integer.parseInt(args[0]));
-		if(!isPrimary){
-			replica.askForName(5000 + Integer.parseInt(args[1]));
+		Replica replica;
+		if(args.length == 1){
+			replica = new Replica(Integer.parseInt(args[0]), true);
+			replica.joinSelf();
+		}
+		else{
+			replica = new Replica(Integer.parseInt(args[0]), false);
+			replica.askForName(basePort + Integer.parseInt(args[1]));
 		}
 		replica.startReceivingMessages();
 		
@@ -211,20 +216,24 @@ public class Replica {
 		System.exit(1);
 	}
 	
+	/** If you are the first process, add yourself to system with a command */
+	private void joinSelf(){
+		Operation op = new AddRetireOperation(OperationType.ADD_NODE, processId, "localhost",""+portNum);
+		Command command = new Command(-1, memory.myNextCommand(), processId, op);
+		memory.acceptCommand(command);
+	}
+	
 	/** used at beginning - server must notify other server that it is joining
 	 * The other server will decide its name */
 	private void askForName(int referralPort){
 		Operation op = new AddRetireOperation(OperationType.ADD_NODE,
 				NamingProtocol.defaultName, "localhost", ""+portNum);
 		Message msgToSend = new Message(NamingProtocol.defaultName, MessageType.JOIN, op.toString());
-		if(referralPort == 5000){    // you're asking Mr. 0
-			controller.sendMsg("0", msgToSend.toString());
-		}
-		else{           // asking someone else, must use a temporary name until you learn their name
-			controller.connect(NamingProtocol.referralName, referralPort);
-			controller.sendMsg(NamingProtocol.referralName, msgToSend.toString());
-		}
+		// must use a temporary port until you learn their name
+		controller.connect(NamingProtocol.referralName, referralPort);
+		controller.sendMsg(NamingProtocol.referralName, msgToSend.toString());
 	}
+	
 	
 	/** writes to play list, called from Memory */
 	void performOperation(Operation op){
@@ -235,13 +244,14 @@ public class Replica {
 		playlist.performOperation(op);
 	}
 	
-
 	private void performAddRetireOp(AddRetireOperation op){
 		switch (op.type){
 		case ADD_NODE:
-			if (op.process_id.equals(processId))   // I already know that I've joined
-				break;
+			if (op.process_id.equals(processId))
+				break;                       // I already know that I've joined
 			controller.connect(op.process_id, Integer.parseInt(op.port));
+			if (op.process_id.equals("0"))
+				break;    // already added 0 to clock, don't do it again
 			memory.tentativeClock.put(op.process_id, (long) 0);
 			break;
 		case RETIRE_NODE:
