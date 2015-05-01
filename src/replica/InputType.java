@@ -7,5 +7,8 @@ public enum InputType {
 	RETIRE,
 	DISCONNECT,
 	CONNECT,
+	PAUSE,
+	START,
+	STABLE,
 	PRINT;
 }

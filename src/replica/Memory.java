@@ -105,7 +105,7 @@ public class Memory {
 			tentativeClock.put(command.serverId, command.acceptStamp);
 			replica.performOperation(command.operation);
 			pLog.add(command);
-			if(Replica.isPrimary){    // make a committed version
+			if(replica.isPrimary){    // make a committed version
 				commit(command);
 			}
 			return true;

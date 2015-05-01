@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 import communication.NetController;
 import util.LoggerSetup;
@@ -15,34 +18,36 @@ public class Replica {
 	
 	// this is the process ID as seen by the tester, as well as the socket port number
 	// it is only used before a proper name has been chosen
-	final int portNum;
-	
-	// Am I the primary server.
-	static boolean isPrimary;
+	private final int uniqueId;
 		
 	// logger for entire process
 	Logger logger;
 	
 	// Event queue for storing all the messages from the wire. This queue would be passed to the NetController.
-	final Queue<InputPacket> queue;
+	private final Queue<InputPacket> queue;
 	
-	// This is where we maintain all the play lists.
+	// This is where we maintain all the play lists (committed play list is used to roll back the primary one)
 	static Playlist playlist = new Playlist();
 	static final Playlist committedPlaylist = new Playlist();
 	
 	// Controller instance used to send messages to all the replicas.
-	final NetController controller;
-	
-	// if true, the server refuses any write requests and shuts down when it is safe to
-	public boolean retiring;
-	
-	public static final int basePort = 5000;
+	private final NetController controller;
 	
 	Memory memory;
+	private Lock memoryLock = new ReentrantLock();
+	
+	//States
+	// Am I the primary server.
+	boolean isPrimary;
+	// if true, the server refuses any write requests and shuts down when it is safe to
+	private boolean retiring;
+	// if true, the server does not perform anti-entropy
+	private boolean paused;
+	
 	
 	public Replica(int uniqueId, boolean firstServer) {
-		
-		this.portNum = basePort + uniqueId;
+
+		this.uniqueId = uniqueId;
 		
 		if(firstServer){  // you are the first of your kind
 			processId = "0";
@@ -62,139 +67,149 @@ public class Replica {
 		
 		// Start NetController and start receiving messages from other servers.
 		this.queue = new Queue<InputPacket>();
-		controller = new NetController(processId, portNum, logger, queue);
+		controller = new NetController(processId, uniqueId, logger, queue);
 	}
 	
 	public void startReceivingMessages() {
 		Thread th = new Thread() {
 			public void run() {
 				while(true) {
-					InputPacket msgPacket = queue.poll();
-					String msg = msgPacket.msg;
-					logger.fine("Trying to parse: " + msg);
-					Message message = Message.parseMsg(msg);
 
-					switch (message.type) {
-						case OPERATION:
-							MessageWithClock opmess = new MessageWithClock(message.payLoad);
-							if(processId.equals(NamingProtocol.defaultName)){
-								logger.info("cannot perform operation, because I have not been named yet");
-							}
-							else if(retiring){
-								logger.info("Cannot perform operation, am retiring");
-							}
-							else if(!memory.clientDependencyCheck(opmess)){
-								logger.info("Can't write " + opmess.message + ", dependency issue");
-							}
-							else{    // free to write
-								Operation op = Operation.operationFromString(opmess.message);
-								Command command = new Command(-1, memory.myNextCommand(), processId, op);
-								memory.acceptCommand(command);
-							}
-							Message responseMessage = new Message(processId, MessageType.WRITE_RESULT, writeResponse().toString());
-							controller.sendMsg(message.process_id, responseMessage.toString());
-							break;
-							
-						case BECOME_PRIMARY:
-							isPrimary = true;
-							memory.commitDeliveredMessages();
-							break;
-							
-						case ENTROPY_REQUEST:
-							memory.checkUndeliveredMessages();
-							MessageWithClock receivedClock = new MessageWithClock(message.payLoad);
-							Set<Command> allcommands = memory.unseenCommands(receivedClock.vector, Integer.parseInt(receivedClock.message));
-							for(Command commandToSend : allcommands){
-								Message msgtoSend = new Message(processId, MessageType.ENTROPY_COMMAND, commandToSend.toString());
-								controller.sendMsg(message.process_id, msgtoSend.toString());
-							}
-							break;
-							
-						case ENTROPY_COMMAND:
-							memory.acceptCommand(Command.fromString(message.payLoad));
-							break;
+					checkNextMessage();
 
-						case READ: 
-							MessageWithClock clientMessage = new MessageWithClock(message.payLoad);
-							String url;
-							if(memory.clientDependencyCheck(clientMessage)){
-								url = playlist.read(clientMessage.message);
-							}
-							else{
-								url = "ERR_DEP";
-							}
-							MessageWithClock response = new MessageWithClock(url,memory.tentativeClock);
-							Message msgtoSend = new Message(processId, MessageType.READ_RESULT, response.toString());
-							controller.sendMsg(message.process_id, msgtoSend.toString());
-							break;
-							
-						case DISCONNECT: 
-							controller.disconnect(message.payLoad);
-							break;
-							
-						case CONNECT:    /// currently used for client connection only
-							logger.info("Connected to client " + message.payLoad);
-							int port = Integer.parseInt( message.payLoad );
-							controller.connect(message.process_id, port);
-							break;
-							
-						case JOIN:
-							AddRetireOperation joinop = (AddRetireOperation)
-													AddRetireOperation.operationFromString(message.payLoad);
-							if(processId.equals(NamingProtocol.defaultName)){
-								logger.warning("Received JOIN, but have no name myself so can do nothing");
-								break;
-							}
-							if(retiring){
-								logger.warning("Received JOIN, but am retiring");
-								break;
-							}
-							if(!joinop.process_id.equals(NamingProtocol.defaultName)){
-								logger.warning("Received JOIN from already-named server");
-								break;
-							}
-							String newName = NamingProtocol.create(processId, memory.myNextCommand());
-							logger.info("Naming server at port "+joinop.port+": "+newName);
-							joinop.process_id = newName;
-							Message nameMessage = new Message(processId, MessageType.NAME, newName);
-							Command addcommand = new Command(-1, memory.myNextCommand(), processId, joinop);
-							memory.acceptCommand(addcommand);
-							controller.sendMsg(newName, nameMessage.toString());
-							break;
-						
-						case NAME:     // you have a name now
-							logger.info("Have been named: "+message.payLoad);
-							processId = message.payLoad;
-							memory.tentativeClock.put(processId, (long) 0);
-
-							// you now know the other server's Bayou name as well...
-							if(controller.ports.containsKey(NamingProtocol.referralName)){
-							controller.outSockets.put(message.process_id, controller.outSockets.get(NamingProtocol.referralName));
-							controller.outSockets.remove(NamingProtocol.referralName);
-							controller.ports.put(message.process_id, controller.ports.get(NamingProtocol.referralName));
-							controller.ports.remove(NamingProtocol.referralName);
-							}
-							logger.info("done naming");
-							antiEntropy();
-							break;
-							
-						case RETIRE_OK:
-							if(isPrimary){
-								logger.info("Passing primary status");
-								Message msgToSend = new Message("",MessageType.BECOME_PRIMARY,"a");
-								controller.sendMsg(message.process_id, msgToSend.toString());
-								// someone else becomes primary, doesn't matter who
-							}
-							System.exit(1);
-							
-						default:
-							logger.warning("received client-side message");
+					try {
+						sleep(30);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
 			}
-
 		};
 		th.start();
+	}
+	
+	private void checkNextMessage(){
+		InputPacket msgPacket = queue.poll();
+		String msg = msgPacket.msg;
+		logger.fine("Trying to parse: " + msg);
+		Message message = Message.parseMsg(msg);
+		memoryLock.lock();
+		
+		switch (message.type) {
+			case OPERATION:
+				MessageWithClock opmess = new MessageWithClock(message.payLoad);
+				if(processId.equals(NamingProtocol.defaultName)){
+					logger.info("cannot perform operation, because I have not been named yet");
+				}
+				else if(retiring){
+					logger.info("Cannot perform operation, am retiring");
+				}
+				else if(!memory.clientDependencyCheck(opmess)){
+					logger.info("Can't write " + opmess.message + ", dependency issue");
+				}
+				else{    // free to write
+					Operation op = Operation.operationFromString(opmess.message);
+					Command command = new Command(-1, memory.myNextCommand(), processId, op);
+					memory.acceptCommand(command);
+				}
+				Message responseMessage = new Message(processId, MessageType.WRITE_RESULT, writeResponse().toString());
+				controller.sendMsg(message.process_id, responseMessage.toString());
+				break;
+				
+			case BECOME_PRIMARY:
+				isPrimary = true;
+				memory.commitDeliveredMessages();
+				break;
+				
+			case ENTROPY_REQUEST:
+				memory.checkUndeliveredMessages();
+				MessageWithClock receivedClock = new MessageWithClock(message.payLoad);
+				Set<Command> allcommands = memory.unseenCommands(receivedClock.vector, Integer.parseInt(receivedClock.message));
+				for(Command commandToSend : allcommands){
+					Message msgtoSend = new Message(processId, MessageType.ENTROPY_COMMAND, commandToSend.toString());
+					controller.sendMsg(message.process_id, msgtoSend.toString());
+				}
+				break;
+				
+			case ENTROPY_COMMAND:
+				memory.acceptCommand(Command.fromString(message.payLoad));
+				break;
+
+			case READ: 
+				MessageWithClock clientMessage = new MessageWithClock(message.payLoad);
+				String url;
+				if(memory.clientDependencyCheck(clientMessage)){
+					url = playlist.read(clientMessage.message);
+				}
+				else{
+					url = "ERR_DEP";
+				}
+				MessageWithClock response = new MessageWithClock(url,memory.tentativeClock);
+				Message msgtoSend = new Message(processId, MessageType.READ_RESULT, response.toString());
+				controller.sendMsg(message.process_id, msgtoSend.toString());
+				break;
+				
+			case DISCONNECT: 
+				controller.disconnect(message.payLoad);
+				break;
+				
+			case CONNECT:    /// currently used for client connection only
+				logger.info("Connected to client " + message.payLoad);
+				int port = Integer.parseInt( message.payLoad );
+				controller.connect(message.process_id, port);
+				break;
+				
+			case JOIN:
+				AddRetireOperation joinop = (AddRetireOperation)
+										AddRetireOperation.operationFromString(message.payLoad);
+				if(processId.equals(NamingProtocol.defaultName)){
+					logger.warning("Received JOIN, but have no name myself so can do nothing");
+					break;
+				}
+				if(retiring){
+					logger.warning("Received JOIN, but am retiring");
+					break;
+				}
+				if(!joinop.process_id.equals(NamingProtocol.defaultName)){
+					logger.warning("Received JOIN from already-named server");
+					break;
+				}
+				String newName = NamingProtocol.create(processId, memory.myNextCommand());
+				logger.info("Naming server at port "+joinop.port+": "+newName);
+				joinop.process_id = newName;
+				Message nameMessage = new Message(processId, MessageType.NAME, newName);
+				Command addcommand = new Command(-1, memory.myNextCommand(), processId, joinop);
+				memory.acceptCommand(addcommand);
+				controller.sendMsg(newName, nameMessage.toString());
+				break;
+			
+			case NAME:     // you have a name now
+				logger.info("Have been named: "+message.payLoad);
+				processId = message.payLoad;
+				memory.tentativeClock.put(processId, (long) 0);
+
+				// you now know the other server's name as well...
+				if(controller.nodes.containsKey(NamingProtocol.referralName)){
+					controller.nodes.put(message.process_id, controller.nodes.get(NamingProtocol.referralName));
+					controller.nodes.remove(NamingProtocol.referralName);
+				}
+				logger.info("done naming");
+				antiEntropy();
+				break;
+				
+			case RETIRE_OK:
+				if(isPrimary){
+					logger.info("Passing primary status");
+					Message msgToSend = new Message("",MessageType.BECOME_PRIMARY,"a");
+					controller.sendMsg(message.process_id, msgToSend.toString());
+					// server who responded becomes primary, doesn't matter who
+				}
+				System.exit(1);
+				
+			default:
+				logger.warning("received client-side message");
+		}
+		memoryLock.unlock();
 	}
 	
 	
@@ -206,7 +221,7 @@ public class Replica {
 		}
 		else{
 			replica = new Replica(Integer.parseInt(args[0]), false);
-			replica.askForName(basePort + Integer.parseInt(args[1]));
+			replica.askForName(Integer.parseInt(args[1]));
 		}
 		replica.startReceivingMessages();
 		
@@ -218,7 +233,7 @@ public class Replica {
 	
 	/** If you are the first process, add yourself to system with a command */
 	private void joinSelf(){
-		Operation op = new AddRetireOperation(OperationType.ADD_NODE, processId, "localhost",""+portNum);
+		Operation op = new AddRetireOperation(OperationType.ADD_NODE, processId, "localhost",""+uniqueId);
 		Command command = new Command(-1, memory.myNextCommand(), processId, op);
 		memory.acceptCommand(command);
 	}
@@ -227,7 +242,7 @@ public class Replica {
 	 * The other server will decide its name */
 	private void askForName(int referralPort){
 		Operation op = new AddRetireOperation(OperationType.ADD_NODE,
-				NamingProtocol.defaultName, "localhost", ""+portNum);
+				NamingProtocol.defaultName, "localhost", ""+uniqueId);
 		Message msgToSend = new Message(NamingProtocol.defaultName, MessageType.JOIN, op.toString());
 		// must use a temporary port until you learn their name
 		controller.connect(NamingProtocol.referralName, referralPort);
@@ -247,8 +262,11 @@ public class Replica {
 	private void performAddRetireOp(AddRetireOperation op){
 		switch (op.type){
 		case ADD_NODE:
-			if (op.process_id.equals(processId))
-				break;                       // I already know that I've joined
+			if (op.process_id.equals(processId)){
+				logger.info("break before I add myself");
+				break;                       // I already know that I've joined )
+			}
+			logger.info("pastbreak");
 			controller.connect(op.process_id, Integer.parseInt(op.port));
 			if (op.process_id.equals("0"))
 				break;    // already added 0 to clock, don't do it again
@@ -261,9 +279,6 @@ public class Replica {
 				if(memory.tentativeClock.isEmpty()){   // I was the only server left
 					logger.info("only server left and retiring, shutting down");
 					System.exit(1);
-				}
-				else{
-					System.out.println(""+memory.tentativeClock.size()+"nodes left");
 				}
 			}
 			else{
@@ -292,18 +307,49 @@ public class Replica {
 		}
 	}
 	
+	/** */
 	private void retire(){
-		Operation op = new AddRetireOperation(OperationType.RETIRE_NODE,processId,"localhost",""+portNum);
+		memoryLock.lock();
+		Operation op = new AddRetireOperation(OperationType.RETIRE_NODE,processId,"localhost",""+uniqueId);
 		Command command = new Command(-1, memory.myNextCommand(), processId, op);
 		memory.acceptCommand(command);
 		logger.info("Retiring at next opportunity");
 		retiring = true;
+		memoryLock.unlock();
 	}
 	
+	/** send a request periodically 
+	 * TODO: figure out good amount of time */
+	private void entropyThread(){
+		Thread th = new Thread() {
+			public void run() {
+				while(true) {
+					memoryLock.lock();
+					
+					antiEntropy();				
+					
+					memoryLock.unlock();
+					try {
+						Thread.sleep( 1000 );
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		th.start();
+	}
+	
+	/** send entropy request to a random replica you are connected to */
 	private void antiEntropy(){
 		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
 		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString());
 		controller.sendMsgToRandom(msg.toString());
+	}
+	private void antiEntropy(String servername){
+		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
+		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString());
+		controller.sendMsg(servername, msg.toString());
 	}
 	
 	private VectorClock writeResponse(){
@@ -313,7 +359,51 @@ public class Replica {
 		return new VectorClock(emptyclock);
 	}
 	
-	/** takes line input and sends it as a message to itself, to run without client / master interface */
+	/** takes commands from Master and gives feedback */
+	private void listenToMaster(){
+		Scanner sc = new Scanner(System.in);
+		while(sc.hasNext()){
+			String inputline = sc.nextLine();
+			
+			if(inputline.equals("RETIRE")){
+				retire();
+			}
+			else if(inputline.startsWith("DISCONNECT")){
+				int idToDisconnect = Integer.parseInt(inputline.substring(10));
+				controller.disconnect(idToDisconnect);
+			}
+			else if(inputline.startsWith("CONNECT")){
+				int idToConnect = Integer.parseInt(inputline.substring(7));
+				controller.restoreConnection(idToConnect);
+			}
+			else if(inputline.equals("PAUSE")){
+				paused = true;
+			}
+			else if(inputline.equals("START")){
+				paused = false;
+			}
+			else if(inputline.equals("STABILIZE")){
+				// TODO 
+			}
+			else if(inputline.equals("PRINTLOG")){
+				memoryLock.lock();
+				memory.checkUndeliveredMessages();
+				memory.pLog.print();
+				memoryLock.unlock();
+				System.out.println("END");
+			}
+			else if(inputline.equals("rebuild")){
+				memory.buildPlaylist();
+			}
+			else{
+				logger.info("got strange instructions: "+inputline);
+			}
+		}
+		sc.close();
+	}
+	
+	
+	/** for testing without Master constraint */
 	private void test(){
 		Scanner sc = new Scanner(System.in);
 		while(sc.hasNext()){
@@ -340,6 +430,14 @@ public class Replica {
 			}
 			else if(inputline.equals("check")){
 				memory.checkUndeliveredMessages();
+			}
+			else if(inputline.startsWith("DISCONNECT")){
+				int idToDisconnect = Integer.parseInt(inputline.substring(10));
+				controller.disconnect(idToDisconnect);
+			}
+			else if(inputline.startsWith("CONNECT")){
+				int idToConnect = Integer.parseInt(inputline.substring(7));
+				controller.restoreConnection(idToConnect);
 			}
 			else{
 				controller.sendMsg(NamingProtocol.myself,inputline);

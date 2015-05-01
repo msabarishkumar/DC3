@@ -22,8 +22,6 @@ public class Client {
 	
 	private Logger logger;
 	
-	private static final int basePort = 5000;
-	
 	public Client(int myId, int serverId){
 		name = NamingProtocol.getClientName(myId);
 		
@@ -35,7 +33,7 @@ public class Client {
 		
 		// Start NetController and set up server connection
 		this.queue = new Queue<InputPacket>();
-		controller = new NetController(NamingProtocol.myself, basePort + myId, logger, queue);
+		controller = new NetController(NamingProtocol.myself, myId, logger, queue);
 		connectToServer(serverId);
 		
 		// create vector clock
@@ -81,14 +79,14 @@ public class Client {
 	/** client only connects to one server at a time, but must be able to change the server in question */
 	private void connectToServer(int serverId){
 		String server = NamingProtocol.serverName;
-		if(controller.ports.containsKey(server)){
-			logger.info("Removing connection to port " + controller.ports.get(server));
-			controller.outSockets.get(server).cleanShutdown();
-			controller.ports.remove(server);
+		if(controller.nodes.containsKey(server)){
+			logger.info("Closing connection to old server");
+			controller.nodes.get(server).sock.cleanShutdown();
+			controller.nodes.remove(server);
 		}
 		logger.info("connecting to server " + serverId);
-		controller.connect(NamingProtocol.serverName, basePort + serverId);
-		Message msgToSend = new Message(name, MessageType.CONNECT, "" + controller.ports.get(NamingProtocol.myself));
+		controller.connect(NamingProtocol.serverName, serverId);
+		Message msgToSend = new Message(name, MessageType.CONNECT, "" + controller.nodes.get(NamingProtocol.myself).id);
 		controller.sendMsg(NamingProtocol.serverName, msgToSend.toString());
 	}
 	

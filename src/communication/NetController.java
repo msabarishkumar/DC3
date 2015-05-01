@@ -13,17 +13,12 @@ package communication;
 
 import java.io.IOException;
 
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,118 +33,26 @@ import util.Queue;
  *
  */
 public class NetController {
+	public static final int basePort = 10000;
 	public String procNum;
-	public InetAddress address;
-	public HashMap<String, Integer> ports;
 	
-	//public final Config config;
+	public HashMap<String, OutStub> nodes = new HashMap<String, OutStub>();
+	
 	public Logger logger;  // same as replica's
 	private final List<IncomingSock> inSockets;
-	public final HashMap<String, OutgoingSock> outSockets;
-	public final Set<String> disconnectedNodes = new HashSet<String>();
-	public final Set<String> clientNodes = new HashSet<String>();
 	private final ListenServer listener;
 	
-	public NetController(String processId, int myPort, Logger logger, Queue<InputPacket> queue){
+	public NetController(String processId, int myId, Logger logger, Queue<InputPacket> queue){
 		this.logger = logger;
 		this.procNum = processId;
-		try {
-			address = InetAddress.getByName("localhost");
-		} catch (UnknownHostException e) { e.printStackTrace();}
-		ports = new HashMap<String, Integer>();
 		
 		inSockets = Collections.synchronizedList(new ArrayList<IncomingSock>());
-		outSockets = new HashMap<String, OutgoingSock>();
 
-		listener = new ListenServer(logger, procNum, myPort, inSockets, queue);
+		listener = new ListenServer(logger, procNum, basePort + myId, inSockets, queue);
 		listener.start();
 		
 		// temporary, for sans-client instructions
-		connect(NamingProtocol.myself,myPort);
-	}
-	
-	// Establish outgoing connection to a process.
-	private synchronized void initOutgoingConn(String proc) throws IOException {
-		if (outSockets.get(proc) != null)
-			throw new IllegalStateException("proc " + proc + " not null");
-		
-		outSockets.put(proc, new OutgoingSock(new Socket(address, ports.get(proc))));
-		logger.info(String.format("Server %s: Socket to %s established", 
-				procNum, proc));
-	}
-	
-	public synchronized void sendMsgs(Set<String> processes, String msg) {//, int partial_count) {
-		for(String processNo: processes) {	
-			logger.info("Sending: " + msg + " to " + processNo);
-			sendMsg(processNo, msg);
-		}
-	}
-	
-	public synchronized void broadCastMsgs(String msg, HashSet<String> exceptProcess)
-	{
-		Set<String> keySet = new HashSet<String>(outSockets.keySet());
-		for (String processId: keySet) {
-			if (processId.equals(this.procNum) || (exceptProcess != null && exceptProcess.contains(processId))) {
-				continue;
-			}
-			sendMsg(processId, msg);
-		}
-	}
-	
-	public synchronized void sendMsgToRandom(String msg){
-		Set<String> nodes = outSockets.keySet();
-		nodes.removeAll(disconnectedNodes);
-		nodes.removeAll(clientNodes);
-		nodes.remove(NamingProtocol.myself);
-		Object[] servers = nodes.toArray();
-		int randomindex = new Random().nextInt(servers.length);
-		
-		String chosenServer = (String) servers[randomindex];
-		logger.info("randomly picked server "+chosenServer);
-		logger.info("   sending "+msg);
-		sendMsg(chosenServer, msg);
-	}
-
-	
-	public synchronized boolean sendMsg(String process, String msg) {
-		if(disconnectedNodes.contains(process)){
-			logger.info("Tried to send message to "+ process + ", but currently disconnected");
-			return false;
-		}
-		logger.info("Sending Message to " + process + ":	" + msg);
-		try {
-			if (outSockets.get(process) == null)
-				initOutgoingConn(process);
-			outSockets.get(process).sendMsg(msg);
-		} catch (IOException e) { 
-			OutgoingSock sock = outSockets.get(process);
-			if (sock != null) {
-				sock.cleanShutdown();
-				outSockets.remove(process);
-				try{
-					initOutgoingConn(process);
-					sock = outSockets.get(process);
-					sock.sendMsg(msg);	
-				} catch(IOException e1){
-					if (sock != null) {
-						sock.cleanShutdown();
-						outSockets.remove(process);
-					}
-					//config.logger.info(String.format("Server %d: Msg to %d failed.",
-                    //    config.procNum, process));
-        		    //config.logger.log(Level.FINE, String.format("Server %d: Socket to %d error",
-                    //    config.procNum, process), e);
-                    return false;
-				}
-				return true;
-			}
-			//config.logger.info(String.format("Server %d: Msg to %d failed.", 
-			//	config.procNum, process));
-			logger.log(Level.FINE, String.format("Server %s: Socket to %s error", 
-				procNum, process), e);
-			return false;
-		}
-		return true;
+		nodes.put( NamingProtocol.myself, new OutStub(myId, false));
 	}
 	
 	/**
@@ -186,63 +89,136 @@ public class NetController {
 			    if(sock != null)
                     sock.cleanShutdown();
         }
-		if(outSockets != null) {
-            for (OutgoingSock sock : outSockets.values())
-			    if(sock != null)
-                    sock.cleanShutdown();
+		if(!nodes.isEmpty()) {
+            for (OutStub node : nodes.values())
+			    if(node.sock != null)
+                    node.sock.cleanShutdown();
         }
-		
 	}
 
-	public void disconnect(String nodeToDisconnect) {
-		disconnectedNodes.add(nodeToDisconnect);
-		//outSockets.remove(nodeToDisconnect);
+	public synchronized boolean sendMsg(String process, String msg) {
+		if(!nodes.containsKey(process)){
+			logger.info("Tried to send to " + process + ", but don't have a connection");
+			return false;
+		}
+		OutStub stub = nodes.get(process);
+		if(!stub.connected){
+			logger.info("Tried to send to " + process + ", but currently disconnected");
+			return false;
+		}
+		logger.info("Sending Message to " + process + ":	" + msg);
+		try {
+			if(stub.sock == null){
+				stub.restartSock();
+			}
+			stub.sock.sendMsg(msg);
+		} catch (IOException e) { 
+			if (stub.sock != null) {
+				stub.closeSock();
+				try{
+					stub.restartSock();
+				} catch(IOException e1){
+					if (stub.sock != null) {
+						stub.closeSock();
+					}
+                    return false;
+				}
+				return true;
+			}
+			logger.log(Level.FINE, String.format("Server %s: Socket to %s error", 
+				procNum, process), e);
+			return false;
+		}
+		return true;
 	}
 	
-	public void connect(String nodeToConnect, int portnum) {
-		disconnectedNodes.remove(nodeToConnect);
-		
-		if(ports.containsKey(nodeToConnect)){
-			logger.warning("tried to connect to "+nodeToConnect+" when already connected");
-		} else{
-			ports.put(nodeToConnect, portnum);
-			
-			outSockets.put(nodeToConnect, null);
-			try {
-				initOutgoingConn(nodeToConnect);
-			} catch (IOException e) { e.printStackTrace(); }
-			
-			if(NamingProtocol.isClientName(nodeToConnect)){
-				clientNodes.add(nodeToConnect);
+	/** Sends to any server but self
+	 * currently does not notice if server is disconnected - this is easy to change*/
+	public synchronized void sendMsgToRandom(String msg){
+		Object[] processNames = nodes.keySet().toArray();
+		boolean successfulsend = false;
+		while(!successfulsend){
+			int randomindex = new Random().nextInt(processNames.length);
+			String randomProcess = (String) processNames[randomindex];
+			if(randomProcess.equals(NamingProtocol.myself)){
+				// don't ask yourself
+			}
+			else if(nodes.get(randomProcess).isClient){
+				// don't ask clients...
+			}
+			else{
+				logger.info("randomly chose "+randomProcess);
+				sendMsg(randomProcess, msg);
+				successfulsend = true;
 			}
 		}
 	}
 	
-	public void forgetAll() {
-		for (String pid : outSockets.keySet()) {
-			disconnectedNodes.add(pid);
-		}
-		outSockets.clear();
+	/** */
+	public void disconnect(String nodeToDisconnect) {
+		nodes.get(nodeToDisconnect).connected = false;
 	}
 	
-	/*  awkward case of client changing the server it is connected to 
-	public void clientChangeServer(int newport){
-		outSockets.get(NamingProtocol.serverName).cleanShutdown();
-		ports.put(NamingProtocol.serverName, newport);
-		outSockets.put(NamingProtocol.serverName, null);
-		try {
-			initOutgoingConn(NamingProtocol.serverName);
-		} catch (IOException e) {
-			e.printStackTrace();
+	/** */
+	public void disconnect(int id){
+		for(String name : nodes.keySet()){
+			if(nodes.get(name).id == id){
+				logger.info("CONTROL: disconnecting "+name+" at port "+id);
+				nodes.get(name).connected = false;
+				return;
+			}
 		}
-	}*/
+	}
 	
-	/*
-	public void connectAll() {
-		for (String node: this.ports.keySet()) {
-			connect(node);
+	/** */
+	public void connect(String name, int id){
+		if(nodes.containsKey(name)){
+			logger.warning("already connected to process "+name);
+			return;
 		}
-		Replica.disconnectedNodes.clear();
-	}*/
-
+		logger.info("CONTROL: connecting to "+name+" at "+id+", client: "+NamingProtocol.isClientName(name));
+		nodes.put(name, new OutStub(id, NamingProtocol.isClientName(name)));
+	}
+	
+	/** */
+	public void restoreConnection(int id){
+		for(String name : nodes.keySet()){
+			if(nodes.get(name).id == id){
+				logger.info("CONTROL: reconnecting "+name+" at port "+id);
+				nodes.get(name).connected = true;
+				return;
+			}
+		}
+	}
+	
+	
+	// unused methods
+	/*
+	public synchronized void sendMsgs(Set<String> processes, String msg) {//, int partial_count) {
+		for(String processNo: processes) {	
+			logger.info("Sending: " + msg + " to " + processNo);
+			sendMsg(processNo, msg);
+		}
+	}
+	
+	public synchronized void broadCastMsgs(String msg, HashSet<String> exceptProcess)
+	{
+		Set<String> keySet = new HashSet<String>(outSockets.keySet());
+		for (String processId: keySet) {
+			if (processId.equals(this.procNum) || (exceptProcess != null && exceptProcess.contains(processId))) {
+				continue;
+			}
+			sendMsg(processId, msg);
+		}
+	}
+	
+	private synchronized void initOutgoingConn(String proc) throws IOException {
+		if (outSockets.get(proc) != null)
+			throw new IllegalStateException("proc " + proc + " not null");
+		
+		outSockets.put(proc, new OutgoingSock(new Socket(address, ports.get(proc))));
+		logger.info(String.format("Server %s: Socket to %s established", 
+				procNum, proc));
+	}
+	*/
 }
