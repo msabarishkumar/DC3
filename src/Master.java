@@ -20,9 +20,13 @@ import util.ProcessHandler;
 public class Master {
 
   public static void main(String [] args) {
-	  
+	
+	// where all replicas and clients are stored
 	List<ProcessHandler> processes = new ArrayList<ProcessHandler>();
+	// so that pause/start/stabilize can be sent to only non-retired replicas, not clients
 	Set<Integer> awakeServers = new HashSet<Integer>();
+	// a counter so that replicas can know if they are fully caught up during stabilize
+	int numOperations = 0;
 	
     Scanner scan = new Scanner(System.in);
     while (scan.hasNextLine()) {
@@ -43,6 +47,7 @@ public class Master {
             	processes.add(serverId,createServer(serverId, serverToTalkTo));
             }
             awakeServers.add(serverId);
+            numOperations++;
             break;
             
             
@@ -55,6 +60,7 @@ public class Master {
             processes.get(serverId).out.println("RETIRE");
             blockUntil(processes.get(serverId).in, "RETIRED");
             awakeServers.remove(serverId);
+            numOperations++;
             break;
             
             
@@ -123,7 +129,7 @@ public class Master {
              * number of servers in the system.
              */
         	for(int i : awakeServers){
-        		processes.get(i).out.println("STABILIZE");
+        		processes.get(i).out.println("STABILIZE" + numOperations);
         		blockUntil(processes.get(i).in, "STABLE");
         	}
             break;
@@ -152,6 +158,7 @@ public class Master {
             String putline = new Operation(OperationType.PUT, songName, URL).toString();
             processes.get(clientId).out.println(putline);
             blockUntil(processes.get(clientId).in, "WRITTEN");
+            numOperations++;
             break;
             
             
@@ -180,11 +187,13 @@ public class Master {
             String deleteline = new Operation(OperationType.DELETE, songName, "").toString();
             processes.get(clientId).out.println(deleteline);
             blockUntil(processes.get(clientId).in, "WRITTEN");
+            numOperations++;
             break;
             
             
         case "echo":    //for testing
         	System.out.println("echo");
+        	break;
         default:
         	System.out.println("I didn't understand that command");
       }
@@ -209,13 +218,7 @@ public class Master {
 		  e.printStackTrace();
 	  }
 
-	  InputStream inputStream = process.getInputStream();
-	  InputStreamReader inst = new InputStreamReader(inputStream);
-	  BufferedReader in = new BufferedReader(inst);
-	  OutputStream outputStream = process.getOutputStream();
-	  PrintWriter out = new PrintWriter(outputStream,true);
-
-	  return new ProcessHandler(uniqueId,process,in,out);
+	  return new ProcessHandler(uniqueId,process);
   }
 
   private static ProcessHandler createServer(int uniqueId, int serverToTalkTo){
@@ -230,13 +233,7 @@ public class Master {
 		  e.printStackTrace();
 	  }
 
-	  InputStream inputStream = process.getInputStream();
-	  InputStreamReader inst = new InputStreamReader(inputStream);
-	  BufferedReader in = new BufferedReader(inst);
-	  OutputStream outputStream = process.getOutputStream();
-	  PrintWriter out = new PrintWriter(outputStream,true);
-
-	  return new ProcessHandler(uniqueId,process,in,out);
+	  return new ProcessHandler(uniqueId,process);
   }
   
   private static ProcessHandler createClient(int uniqueId, int serverToTalkTo){
@@ -251,13 +248,7 @@ public class Master {
 		  e.printStackTrace();
 	  }
 
-	  InputStream inputStream = process.getInputStream();
-	  InputStreamReader inst = new InputStreamReader(inputStream);
-	  BufferedReader in = new BufferedReader(inst);
-	  OutputStream outputStream = process.getOutputStream();
-	  PrintWriter out = new PrintWriter(outputStream,true);
-
-	  return new ProcessHandler(uniqueId,process,in,out);
+	  return new ProcessHandler(uniqueId,process);
   }
   
   
@@ -290,7 +281,7 @@ public class Master {
 	  }
   }
   
-  /** blocks until it receives "END", or hits the end of file.  Prints anything else it receives */
+  /** blocks until it receives "-END", or hits the end of file.  Prints anything else it receives */
   private static void readAndPrint(BufferedReader input){
 	  while(true){
 		  try {
@@ -301,7 +292,7 @@ public class Master {
 				  System.out.println("server is down");
 				  return;
 			  }
-			  else if(line.equals("END")){
+			  else if(line.equals("-END")){
 				  return;
 			  }
 			  else{

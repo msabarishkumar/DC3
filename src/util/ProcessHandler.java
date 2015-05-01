@@ -1,6 +1,9 @@
 package util;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 
 public class ProcessHandler {
@@ -10,11 +13,16 @@ public class ProcessHandler {
 	public BufferedReader in;
 	public PrintWriter out;
 	
-	public ProcessHandler(int id, Process proc, BufferedReader inread, PrintWriter outwrite){
+	public ProcessHandler(int id, Process process){
 		this.processID = id;
-		this.process = proc;
-		this.in = inread;
-		this.out = outwrite;
+		this.process = process;
+		
+		InputStream inputStream = process.getInputStream();
+		InputStreamReader inst = new InputStreamReader(inputStream);
+		this.in = new BufferedReader(inst);
+		
+		OutputStream outputStream = process.getOutputStream();
+		this.out = new PrintWriter(outputStream,true);
 	}
 	
 }

@@ -10,8 +10,7 @@ public enum MessageType {
 	// Read.
 	READ, READ_RESULT,
 	
-	// DISCONNECT and CONNECT.
-	DISCONNECT,
+	// Client establishing connection with Replica
 	CONNECT,
 	
 	// RETIRE.

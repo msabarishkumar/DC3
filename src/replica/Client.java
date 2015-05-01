@@ -44,36 +44,11 @@ public class Client {
 	/** arg0 = client's id
 	 * arg1 = id of server to connect to    */
 	public static void main(String[] args){
-		
 		Client me = new Client(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 		me.messageThread();
 		
-		Scanner sc = new Scanner(System.in);
-		while(sc.hasNext()){
-			String inputline = sc.nextLine();
-			
-			if(inputline.equals("exit")){
-				sc.close();
-				me.logger.info("shutting down cause told to");
-				System.exit(0);
-			}
-			else if(inputline.startsWith("connect")){
-				int port = Integer.parseInt(inputline.substring(7));
-				me.connectToServer(port);
-			}
-			else if(inputline.equals("printclock")){
-				me.printVectors();
-			}
-			else if(inputline.startsWith("READ")){
-				me.sendRead(inputline.substring(4));
-			}
-			else{
-				me.sendWrite(inputline);
-			}
-		}
-		me.logger.info("master down, shutting myself down");
-		sc.close();
-		
+		me.test();
+		//me.listenToMaster();
 	}
 	
 	/** client only connects to one server at a time, but must be able to change the server in question */
@@ -118,7 +93,7 @@ public class Client {
 			VectorClock vc = new VectorClock(message.payLoad);
 			logger.info("Write completed");
 			increment(vc.clock);
-			System.out.println("WRITE_FIN");
+			System.out.println("WRITTEN");
 			break;
 			
 		case READ_RESULT:
@@ -172,4 +147,65 @@ public class Client {
 		}
 	}
 
+	private void listenToMaster(){
+		Scanner sc = new Scanner(System.in);
+		while(sc.hasNext()){
+			String inputline = sc.nextLine();
+			
+			if(inputline.equals("EXIT")){
+				sc.close();
+				logger.info("shutting down cause told to");
+				System.exit(0);
+			}
+			else if(inputline.startsWith("CONNECT")){
+				int port = Integer.parseInt(inputline.substring(7));
+				connectToServer(port);
+			}
+			else if(inputline.startsWith("DISCONNECT")){
+				int port = Integer.parseInt(inputline.substring(10));
+				// at the moment, ignore this as CONNECT gets rid of old server
+				// and you will only receive instructions if properly connected
+			}
+			else if(inputline.startsWith("PUT") || inputline.startsWith("DELETE")){
+				sendWrite(inputline);
+			}
+			else if(inputline.startsWith("READ")){
+				sendRead(inputline.substring(4));
+			}
+			else{
+				logger.info("I didn't understand "+inputline);
+			}
+		}
+		logger.info("master down, shutting myself down");
+		sc.close();
+	}
+	
+	/** for testing without master constraint */
+	private void test(){
+		Scanner sc = new Scanner(System.in);
+		while(sc.hasNext()){
+			String inputline = sc.nextLine();
+			
+			if(inputline.equals("exit")){
+				sc.close();
+				logger.info("shutting down cause told to");
+				System.exit(0);
+			}
+			else if(inputline.startsWith("connect")){
+				int port = Integer.parseInt(inputline.substring(7));
+				connectToServer(port);
+			}
+			else if(inputline.equals("printclock")){
+				printVectors();
+			}
+			else if(inputline.startsWith("READ")){
+				sendRead(inputline.substring(4));
+			}
+			else{
+				sendWrite(inputline);
+			}
+		}
+		logger.info("master down, shutting myself down");
+		sc.close();
+	}
 }

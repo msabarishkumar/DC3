@@ -1,15 +1,14 @@
 package communication;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import replica.Client;
-import replica.NamingProtocol;
-
 public class OutStub{
+	/* this is really just a container for OutGoingSock, but it simplifies accessing the socks by both
+	   name (for normal interaction) and id (for master instructions)
+	*/
 	public int id;
 	public OutgoingSock sock;
 	public boolean connected;
@@ -24,7 +23,6 @@ public class OutStub{
 		try {
 			this.sock = new OutgoingSock(new Socket(InetAddress.getLocalHost(), NetController.basePort + id));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

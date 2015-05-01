@@ -1,6 +1,7 @@
 package replica;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 
 import java.util.Set;
@@ -70,6 +71,44 @@ public class Replica {
 		controller = new NetController(processId, uniqueId, logger, queue);
 	}
 	
+	public static void main(String[] args) {
+		Replica replica;
+		if(args.length == 1){
+			replica = new Replica(Integer.parseInt(args[0]), true);
+			replica.joinSelf();
+		}
+		else{
+			replica = new Replica(Integer.parseInt(args[0]), false);
+			replica.askForName(Integer.parseInt(args[1]));
+		}
+		replica.startReceivingMessages();
+		
+		replica.test();
+		
+		replica.logger.info("   master down, shutting myself down");
+		System.exit(1);
+	}
+	
+	/** If you are the first process, add yourself to system with a command */
+	private void joinSelf(){
+		Operation op = new AddRetireOperation(OperationType.ADD_NODE, processId, "localhost",""+uniqueId);
+		Command command = new Command(-1, memory.myNextCommand(), processId, op);
+		memory.acceptCommand(command);
+	}
+	
+	/** used at beginning - server must notify other server that it is joining
+	 * The other server will decide its name */
+	private void askForName(int referralPort){
+		Operation op = new AddRetireOperation(OperationType.ADD_NODE,
+				NamingProtocol.defaultName, "localhost", ""+uniqueId);
+		Message msgToSend = new Message(NamingProtocol.defaultName, MessageType.JOIN, op.toString());
+		// must use a temporary port until you learn their name
+		controller.connect(NamingProtocol.referralName, referralPort);
+		controller.sendMsg(NamingProtocol.referralName, msgToSend.toString());
+	}
+	
+	
+	/** message receiving and processing */
 	public void startReceivingMessages() {
 		Thread th = new Thread() {
 			public void run() {
@@ -112,7 +151,12 @@ public class Replica {
 					Command command = new Command(-1, memory.myNextCommand(), processId, op);
 					memory.acceptCommand(command);
 				}
-				Message responseMessage = new Message(processId, MessageType.WRITE_RESULT, writeResponse().toString());
+				// update client's clock
+				long Wid = memory.myNextCommand() - 1;
+				HashMap<String, Long> emptyclock = new HashMap<String, Long>();
+				emptyclock.put(processId, Wid);
+				VectorClock writeResponse = new VectorClock(emptyclock);
+				Message responseMessage = new Message(processId, MessageType.WRITE_RESULT, writeResponse.toString());
 				controller.sendMsg(message.process_id, responseMessage.toString());
 				break;
 				
@@ -147,10 +191,6 @@ public class Replica {
 				MessageWithClock response = new MessageWithClock(url,memory.tentativeClock);
 				Message msgtoSend = new Message(processId, MessageType.READ_RESULT, response.toString());
 				controller.sendMsg(message.process_id, msgtoSend.toString());
-				break;
-				
-			case DISCONNECT: 
-				controller.disconnect(message.payLoad);
 				break;
 				
 			case CONNECT:    /// currently used for client connection only
@@ -204,6 +244,7 @@ public class Replica {
 					controller.sendMsg(message.process_id, msgToSend.toString());
 					// server who responded becomes primary, doesn't matter who
 				}
+				System.out.println("RETIRED");
 				System.exit(1);
 				
 			default:
@@ -211,44 +252,6 @@ public class Replica {
 		}
 		memoryLock.unlock();
 	}
-	
-	
-	public static void main(String[] args) {
-		Replica replica;
-		if(args.length == 1){
-			replica = new Replica(Integer.parseInt(args[0]), true);
-			replica.joinSelf();
-		}
-		else{
-			replica = new Replica(Integer.parseInt(args[0]), false);
-			replica.askForName(Integer.parseInt(args[1]));
-		}
-		replica.startReceivingMessages();
-		
-		replica.test();
-		
-		replica.logger.info("   master down, shutting myself down");
-		System.exit(1);
-	}
-	
-	/** If you are the first process, add yourself to system with a command */
-	private void joinSelf(){
-		Operation op = new AddRetireOperation(OperationType.ADD_NODE, processId, "localhost",""+uniqueId);
-		Command command = new Command(-1, memory.myNextCommand(), processId, op);
-		memory.acceptCommand(command);
-	}
-	
-	/** used at beginning - server must notify other server that it is joining
-	 * The other server will decide its name */
-	private void askForName(int referralPort){
-		Operation op = new AddRetireOperation(OperationType.ADD_NODE,
-				NamingProtocol.defaultName, "localhost", ""+uniqueId);
-		Message msgToSend = new Message(NamingProtocol.defaultName, MessageType.JOIN, op.toString());
-		// must use a temporary port until you learn their name
-		controller.connect(NamingProtocol.referralName, referralPort);
-		controller.sendMsg(NamingProtocol.referralName, msgToSend.toString());
-	}
-	
 	
 	/** writes to play list, called from Memory */
 	void performOperation(Operation op){
@@ -278,19 +281,19 @@ public class Replica {
 				// sent to myself
 				if(memory.tentativeClock.isEmpty()){   // I was the only server left
 					logger.info("only server left and retiring, shutting down");
+					System.out.println("RETIRED");
 					System.exit(1);
 				}
 			}
 			else{
 				logger.info("Acknowledging retirement of "+op.process_id);
 				controller.sendMsg(op.process_id, new Message(processId, MessageType.RETIRE_OK,"a").toString());
-				controller.disconnect(op.process_id);
+				controller.removeNode(op.process_id);
 			}
 			break;
 		default: logger.info("ran performAddRetireOp on wrong operation: "+op.type);
 		}
 	}
-
 	
 	void performCommittedOperation(Operation op){
 		if(op instanceof AddRetireOperation){
@@ -324,11 +327,13 @@ public class Replica {
 		Thread th = new Thread() {
 			public void run() {
 				while(true) {
-					memoryLock.lock();
-					
-					antiEntropy();				
-					
-					memoryLock.unlock();
+					if(!paused){
+						memoryLock.lock();
+						
+						antiEntropy();
+						
+						memoryLock.unlock();
+					}
 					try {
 						Thread.sleep( 1000 );
 					} catch (InterruptedException e) {
@@ -345,11 +350,6 @@ public class Replica {
 		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
 		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString());
 		controller.sendMsgToRandom(msg.toString());
-	}
-	private void antiEntropy(String servername){
-		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
-		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString());
-		controller.sendMsg(servername, msg.toString());
 	}
 	
 	private VectorClock writeResponse(){
@@ -383,14 +383,32 @@ public class Replica {
 				paused = false;
 			}
 			else if(inputline.equals("STABILIZE")){
-				// TODO 
+				memoryLock.lock();
+				memory.checkUndeliveredMessages();
+				int opsIShouldSee = Integer.parseInt(inputline.substring(9));
+				if(memory.committedWriteLog.size() == opsIShouldSee){
+					memoryLock.unlock();
+					logger.info("Received STABILIZE, and am currently stable");
+				}
+				else{
+					//wait long enough that you will have gossiped with everyone
+					long waitTillStable = controller.nodes.size() * 1000;
+					memoryLock.unlock();
+					logger.info("Received STABILIZE, waiting for " + waitTillStable);
+					try {
+						Thread.sleep(waitTillStable);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				System.out.println("STABLE");
 			}
 			else if(inputline.equals("PRINTLOG")){
 				memoryLock.lock();
 				memory.checkUndeliveredMessages();
 				memory.pLog.print();
 				memoryLock.unlock();
-				System.out.println("END");
+				System.out.println("-END");
 			}
 			else if(inputline.equals("rebuild")){
 				memory.buildPlaylist();

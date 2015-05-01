@@ -34,13 +34,17 @@ import util.Queue;
  */
 public class NetController {
 	public static final int basePort = 10000;
-	public String procNum;
 	
-	public HashMap<String, OutStub> nodes = new HashMap<String, OutStub>();
+	public String procNum; // name of this process
+	
+	public HashMap<String, OutStub> nodes = new HashMap<String, OutStub>();  //OutSocket container
 	
 	public Logger logger;  // same as replica's
+	
 	private final List<IncomingSock> inSockets;
 	private final ListenServer listener;
+	
+	public int lastTalk;  //used for "random" send that iterates through ids
 	
 	public NetController(String processId, int myId, Logger logger, Queue<InputPacket> queue){
 		this.logger = logger;
@@ -138,7 +142,9 @@ public class NetController {
 		Object[] processNames = nodes.keySet().toArray();
 		boolean successfulsend = false;
 		while(!successfulsend){
-			int randomindex = new Random().nextInt(processNames.length);
+			//int randomindex = new Random().nextInt(processNames.length);
+			int randomindex = lastTalk++;                      //not really random anymore
+			if(lastTalk >= processNames.length){   lastTalk = 0;  }   // but need guarantees or stabilize will take a long time
 			String randomProcess = (String) processNames[randomindex];
 			if(randomProcess.equals(NamingProtocol.myself)){
 				// don't ask yourself
@@ -154,12 +160,23 @@ public class NetController {
 		}
 	}
 	
-	/** */
-	public void disconnect(String nodeToDisconnect) {
-		nodes.get(nodeToDisconnect).connected = false;
+	/** establish connection and add to nodes */
+	public void connect(String name, int id){
+		if(nodes.containsKey(name)){
+			logger.warning("already connected to process "+name);
+			return;
+		}
+		logger.info("CONTROL: connecting to "+name+" at "+id+", client: "+NamingProtocol.isClientName(name));
+		nodes.put(name, new OutStub(id, NamingProtocol.isClientName(name)));
 	}
 	
-	/** */
+	/** called when a process will not be connecting again (when it is retiring, for instance) */
+	public void removeNode(String nodeToDisconnect) {
+		nodes.get(nodeToDisconnect).closeSock();
+		nodes.remove(nodeToDisconnect);
+	}
+	
+	/** for Master testing, disconnect to a particular node - should be invisible to the Replica*/
 	public void disconnect(int id){
 		for(String name : nodes.keySet()){
 			if(nodes.get(name).id == id){
@@ -170,17 +187,7 @@ public class NetController {
 		}
 	}
 	
-	/** */
-	public void connect(String name, int id){
-		if(nodes.containsKey(name)){
-			logger.warning("already connected to process "+name);
-			return;
-		}
-		logger.info("CONTROL: connecting to "+name+" at "+id+", client: "+NamingProtocol.isClientName(name));
-		nodes.put(name, new OutStub(id, NamingProtocol.isClientName(name)));
-	}
-	
-	/** */
+	/** remove block caused by earlier disconnect */
 	public void restoreConnection(int id){
 		for(String name : nodes.keySet()){
 			if(nodes.get(name).id == id){
