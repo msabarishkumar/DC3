@@ -14,32 +14,27 @@ public class PrintLog {
 		log = new ArrayList<Command>();
 	}
 	
-	public void add(Command addition){
-		if(addition.operation instanceof AddRetireOperation){
+	public void add(Command logEntry){
+		if(logEntry.operation instanceof AddRetireOperation){
 			return;   // only log writes
 		}
 		
 		//clone command, to be safe
-		Command base = Command.fromString(addition.toString());
-		Command alternate = Command.fromString(addition.toString());
-		if(base.CSN == -1){
-			alternate.CSN = 1;
-		}
-		else {
-			alternate.CSN = -1;
-		}
+		Command entry = Command.fromString(logEntry.toString());
+		
 		for(Command c : log){
-			if(c.equals(alternate)){   // both committed and uncommitted copy are present
-				c.CSN = 1;    // make it a non-negative CSN, doesn't matter what
-				return;
-			}
-			else if(c.equals(base)){   // added same command twice
-				System.out.println("error, added command twice: "+c.toString());
-				return;
+			if((c.acceptStamp == entry.acceptStamp) && (c.serverId.equals(entry.serverId))){
+				if(entry.CSN != c.CSN){   // both committed and uncommitted copy are present
+					c.CSN = 1;  // make it a non-negative CSN, doesn't matter what
+					return;
+				}
+				else{    // added same command twice
+					return;
+				}
 			}
 		}
 		// haven't added this command yet:
-		log.add(base);
+		log.add(entry);
 	}
 	
 	

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 public class Command implements Serializable {
+	
 	int CSN;
 	long acceptStamp;
 	String serverId;

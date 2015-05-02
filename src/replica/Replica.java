@@ -182,6 +182,7 @@ public class Replica {
 				MessageWithClock clientMessage = new MessageWithClock(message.payLoad);
 				String url;
 				if(memory.clientDependencyCheck(clientMessage)){
+					memory.buildPlaylist();
 					url = playlist.read(clientMessage.message);
 				}
 				else{
@@ -396,7 +397,6 @@ public class Replica {
 					memoryLock.lock();
 				}
 				memory.checkUndeliveredMessages();
-				memory.buildPlaylist();    // rebuild playlist based on correct ordering of messages
 				memoryLock.unlock();
 				System.out.println("STABLE");
 			}
