@@ -1,11 +1,13 @@
 package replica;
 
 import java.util.HashMap;
+
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
@@ -45,7 +47,6 @@ public class Replica {
 	// if true, the server does not perform anti-entropy
 	private boolean paused;
 	
-	
 	public Replica(int uniqueId, boolean firstServer) {
 		this.uniqueId = uniqueId;
 		if(firstServer){  // you are the first of your kind
@@ -79,8 +80,9 @@ public class Replica {
 		}
 		replica.startReceivingMessages();
 		
-		//replica.test();
 		replica.entropyThread();
+		
+		//replica.test();
 		replica.listenToMaster();
 		
 		replica.logger.info("   master down, shutting myself down");
@@ -346,11 +348,17 @@ public class Replica {
 		th.start();
 	}
 	
-	/** send entropy request to a replica you are connected to */
+	/** send entropy request to a random replica you are connected to */
 	private void antiEntropy(){
 		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
 		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString());
 		controller.sendMsgToRandom(msg.toString());
+	}
+	/** send entropy request to a specific replica you are connected to */
+	private void antiEntropy(String process){
+		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
+		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString());
+		controller.sendMsg(process, msg.toString());
 	}
 	
 	/** takes commands from Master and gives feedback */
@@ -378,15 +386,16 @@ public class Replica {
 				paused = false;
 			}
 			else if(inputline.startsWith("STABILIZE")){
+				int opsIShouldSee = Integer.parseInt(inputline.substring(9));
 				memoryLock.lock();
 				memory.checkUndeliveredMessages();
-				int opsIShouldSee = Integer.parseInt(inputline.substring(9));
+				
 				if(memory.committedWriteLog.size() == opsIShouldSee){
 					logger.info("Received STABILIZE, and am currently stable");
 				}
 				else{
 					//wait long enough that you will have gossiped with everyone
-					long waitTillStable = controller.nodes.size() * 1000;
+					long waitTillStable = controller.nodes.size() * 1500;
 					logger.info("Received STABILIZE, waiting for " + waitTillStable);
 					memoryLock.unlock();
 					try {
@@ -406,6 +415,11 @@ public class Replica {
 				memory.pLog.print();
 				memoryLock.unlock();
 				System.out.println("-END");
+			}
+			else if(inputline.startsWith("NEWREPLICA")){
+				// needed for entropy with nodes you haven't seen the JOIN for (which may be necessary, as in test 1_2)
+				int newId = Integer.parseInt(inputline.substring(10));
+				controller.connect("temp"+newId, newId);
 			}
 			else if(inputline.equals("EXIT")){
 				logger.info("told by Master to shut down");

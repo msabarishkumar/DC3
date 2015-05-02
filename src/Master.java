@@ -34,11 +34,17 @@ public class Master {
             	processes.put(serverId,createFirstServer(serverId));
             }
             else{
+                for(int server : awakeServers){
+                	processes.get(server).out.println("NEWREPLICA"+serverId);
+                }
             	int serverToTalkTo = Collections.min(awakeServers);   // choose the oldest server to talk to
             	processes.put(serverId,createServer(serverId, serverToTalkTo));
             }
             awakeServers.add(serverId);
             numOperations++;
+            try {
+            	Thread.sleep(50);
+			} catch (InterruptedException e) { e.printStackTrace(); }
             break;
             
             
