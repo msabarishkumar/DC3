@@ -33,6 +33,7 @@ import util.Queue;
  *
  */
 public class NetController {
+	
 	public static final int basePort = 10000;
 	
 	public String procNum; // name of this process
@@ -141,16 +142,19 @@ public class NetController {
 	public synchronized void sendMsgToRandom(String msg){
 		Object[] processNames = nodes.keySet().toArray();
 		boolean successfulsend = false;
-		while(!successfulsend){
+		int timeout = 0;
+		while(!successfulsend && (timeout <= processNames.length)){
 			//int randomindex = new Random().nextInt(processNames.length);
 			int randomindex = lastTalk++;                      //not really random anymore
 			if(lastTalk >= processNames.length){   lastTalk = 0;  }   // but need guarantees or stabilize will take a long time
 			String randomProcess = (String) processNames[randomindex];
 			if(randomProcess.equals(NamingProtocol.myself)){
 				// don't ask yourself
+				timeout++;
 			}
 			else if(nodes.get(randomProcess).isClient){
 				// don't ask clients...
+				timeout++;
 			}
 			else{
 				logger.info("randomly chose "+randomProcess);

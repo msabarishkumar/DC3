@@ -47,9 +47,7 @@ public class Replica {
 	
 	
 	public Replica(int uniqueId, boolean firstServer) {
-
 		this.uniqueId = uniqueId;
-		
 		if(firstServer){  // you are the first of your kind
 			processId = "0";
 			isPrimary = true;
@@ -57,19 +55,17 @@ public class Replica {
 		else{
 			processId = NamingProtocol.defaultName;
 		}
-		
 		try {
 			logger = LoggerSetup.create(LoggerSetup.defaultLogLocation() + "/logs/" + uniqueId + ".log");	
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	
 		memory = new Memory(this);
-		
 		// Start NetController and start receiving messages from other servers.
 		this.queue = new Queue<InputPacket>();
 		controller = new NetController(processId, uniqueId, logger, queue);
 	}
+	
 	
 	public static void main(String[] args) {
 		Replica replica;
@@ -83,7 +79,9 @@ public class Replica {
 		}
 		replica.startReceivingMessages();
 		
-		replica.test();
+		//replica.test();
+		replica.entropyThread();
+		replica.listenToMaster();
 		
 		replica.logger.info("   master down, shutting myself down");
 		System.exit(1);
@@ -108,16 +106,17 @@ public class Replica {
 	}
 	
 	
-	/** message receiving and processing */
+	/** message processing, handles most of the memory/playlist maintenance */
 	public void startReceivingMessages() {
 		Thread th = new Thread() {
 			public void run() {
+				logger.info("Starting message thread");
 				while(true) {
 
 					checkNextMessage();
 
 					try {
-						sleep(30);
+						sleep(20);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -326,6 +325,7 @@ public class Replica {
 	private void entropyThread(){
 		Thread th = new Thread() {
 			public void run() {
+				logger.info("Starting entropy thread");
 				while(true) {
 					if(!paused){
 						memoryLock.lock();
@@ -345,18 +345,11 @@ public class Replica {
 		th.start();
 	}
 	
-	/** send entropy request to a random replica you are connected to */
+	/** send entropy request to a replica you are connected to */
 	private void antiEntropy(){
 		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
 		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString());
 		controller.sendMsgToRandom(msg.toString());
-	}
-	
-	private VectorClock writeResponse(){
-		long Wid = memory.myNextCommand() - 1;
-		HashMap<String, Long> emptyclock = new HashMap<String, Long>();
-		emptyclock.put(processId, Wid);
-		return new VectorClock(emptyclock);
 	}
 	
 	/** takes commands from Master and gives feedback */
@@ -364,6 +357,7 @@ public class Replica {
 		Scanner sc = new Scanner(System.in);
 		while(sc.hasNext()){
 			String inputline = sc.nextLine();
+			logger.info("Received "+inputline+" from Master");
 			
 			if(inputline.equals("RETIRE")){
 				retire();
@@ -387,20 +381,23 @@ public class Replica {
 				memory.checkUndeliveredMessages();
 				int opsIShouldSee = Integer.parseInt(inputline.substring(9));
 				if(memory.committedWriteLog.size() == opsIShouldSee){
-					memoryLock.unlock();
 					logger.info("Received STABILIZE, and am currently stable");
 				}
 				else{
 					//wait long enough that you will have gossiped with everyone
 					long waitTillStable = controller.nodes.size() * 1000;
-					memoryLock.unlock();
 					logger.info("Received STABILIZE, waiting for " + waitTillStable);
+					memoryLock.unlock();
 					try {
 						Thread.sleep(waitTillStable);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+					memoryLock.lock();
 				}
+				memory.checkUndeliveredMessages();
+				memory.buildPlaylist();    // rebuild playlist based on correct ordering of messages
+				memoryLock.unlock();
 				System.out.println("STABLE");
 			}
 			else if(inputline.equals("PRINTLOG")){
@@ -409,9 +406,6 @@ public class Replica {
 				memory.pLog.print();
 				memoryLock.unlock();
 				System.out.println("-END");
-			}
-			else if(inputline.equals("rebuild")){
-				memory.buildPlaylist();
 			}
 			else{
 				logger.info("got strange instructions: "+inputline);
