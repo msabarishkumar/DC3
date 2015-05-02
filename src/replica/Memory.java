@@ -212,7 +212,14 @@ public class Memory {
 	
 	/** Compare client's current VC to yours*/
 	boolean clientDependencyCheck(MessageWithClock message){
-		return VectorClock.compareClocks(message.vector.clock, tentativeClock);
+		//return VectorClock.compareClocks(message.vector.clock, tentativeClock);
+		HashMap<String, Long> clientclock = message.vector.clock;
+		for(String s : clientclock.keySet()){
+			if(Memory.completeV(tentativeClock,s) < clientclock.get(s)){
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/** recreates play list in a set order, so that everyone's is eventually the same */
