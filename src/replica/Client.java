@@ -47,8 +47,8 @@ public class Client {
 		Client me = new Client(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 		me.messageThread();
 		
-		me.test();
-		//me.listenToMaster();
+		//me.test();
+		me.listenToMaster();
 		
 		me.controller.shutdown();
 	}
@@ -104,6 +104,7 @@ public class Client {
 			logger.info("Received url = "+url);
 			increment(result.vector.clock);
 			System.out.println(url);
+			System.out.println("-END");
 			break;
 			
 		default: 
@@ -153,6 +154,7 @@ public class Client {
 		Scanner sc = new Scanner(System.in);
 		while(sc.hasNext()){
 			String inputline = sc.nextLine();
+			logger.info("Received " + inputline + "from master");
 			
 			if(inputline.equals("EXIT")){
 				sc.close();
@@ -171,8 +173,8 @@ public class Client {
 			else if(inputline.startsWith("PUT") || inputline.startsWith("DELETE")){
 				sendWrite(inputline);
 			}
-			else if(inputline.startsWith("READ")){
-				sendRead(inputline.substring(4));
+			else if(inputline.startsWith("GET")){
+				sendRead(inputline.substring(3));
 			}
 			else{
 				logger.info("I didn't understand "+inputline);

@@ -172,8 +172,7 @@ public class Master {
              * the master script in the format specified in the handout. This command 
              * should block until the client communicates with one server.
              */
-            String getline = new Operation(OperationType.GET, songName, "").toString();
-            processes.get(clientId).out.println(getline);
+            processes.get(clientId).out.println("GET"+songName);
             readAndPrint(processes.get(clientId).in);
             break;
             
