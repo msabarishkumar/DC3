@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -22,7 +23,7 @@ public class Master {
   public static void main(String [] args) {
 	
 	// where all replicas and clients are stored
-	List<ProcessHandler> processes = new ArrayList<ProcessHandler>();
+	HashMap<Integer, ProcessHandler> processes = new HashMap<Integer,ProcessHandler>();
 	// so that pause/start/stabilize can be sent to only non-retired replicas, not clients
 	Set<Integer> awakeServers = new HashSet<Integer>();
 	// a counter so that replicas can know if they are fully caught up during stabilize
@@ -40,11 +41,11 @@ public class Master {
              * Start up a new server with this id and connect it to all servers
              */
             if(awakeServers.isEmpty()){  // you're the first server
-            	processes.add(serverId,createFirstServer(serverId));
+            	processes.put(serverId,createFirstServer(serverId));
             }
             else{
             	int serverToTalkTo = Collections.min(awakeServers);   // choose the oldest server to talk to
-            	processes.add(serverId,createServer(serverId, serverToTalkTo));
+            	processes.put(serverId,createServer(serverId, serverToTalkTo));
             }
             awakeServers.add(serverId);
             numOperations++;
@@ -71,7 +72,7 @@ public class Master {
              * Start a new client with the id specified and connect it to 
              * the server
              */
-            processes.add(clientId,createClient(clientId, serverId));
+            processes.put(clientId,createClient(clientId, serverId));
             break;
             
             
@@ -199,7 +200,7 @@ public class Master {
       }
     }
     //shut down
-    for(ProcessHandler process : processes){
+    for(ProcessHandler process : processes.values()){
     	process.out.println("EXIT");
     }
     scan.close();
