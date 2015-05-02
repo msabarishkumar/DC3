@@ -84,7 +84,7 @@ public class Replica {
 		replica.listenToMaster();
 		
 		replica.logger.info("   master down, shutting myself down");
-		System.exit(1);
+		replica.shutdown();
 	}
 	
 	/** If you are the first process, add yourself to system with a command */
@@ -244,7 +244,7 @@ public class Replica {
 					// server who responded becomes primary, doesn't matter who
 				}
 				System.out.println("RETIRED");
-				System.exit(1);
+				shutdown();
 				
 			default:
 				logger.warning("received client-side message");
@@ -281,7 +281,7 @@ public class Replica {
 				if(memory.tentativeClock.isEmpty()){   // I was the only server left
 					logger.info("only server left and retiring, shutting down");
 					System.out.println("RETIRED");
-					System.exit(1);
+					shutdown();
 				}
 			}
 			else{
@@ -376,7 +376,7 @@ public class Replica {
 			else if(inputline.equals("START")){
 				paused = false;
 			}
-			else if(inputline.equals("STABILIZE")){
+			else if(inputline.startsWith("STABILIZE")){
 				memoryLock.lock();
 				memory.checkUndeliveredMessages();
 				int opsIShouldSee = Integer.parseInt(inputline.substring(9));
@@ -407,6 +407,10 @@ public class Replica {
 				memoryLock.unlock();
 				System.out.println("-END");
 			}
+			else if(inputline.equals("EXIT")){
+				logger.info("told by Master to shut down");
+				shutdown();
+			}
 			else{
 				logger.info("got strange instructions: "+inputline);
 			}
@@ -414,6 +418,10 @@ public class Replica {
 		sc.close();
 	}
 	
+	private void shutdown(){
+		controller.shutdown();
+		System.exit(1);
+	}
 	
 	/** for testing without Master constraint */
 	private void test(){

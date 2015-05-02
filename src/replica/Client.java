@@ -49,6 +49,8 @@ public class Client {
 		
 		me.test();
 		//me.listenToMaster();
+		
+		me.controller.shutdown();
 	}
 	
 	/** client only connects to one server at a time, but must be able to change the server in question */
@@ -155,7 +157,7 @@ public class Client {
 			if(inputline.equals("EXIT")){
 				sc.close();
 				logger.info("shutting down cause told to");
-				System.exit(0);
+				break;
 			}
 			else if(inputline.startsWith("CONNECT")){
 				int port = Integer.parseInt(inputline.substring(7));
@@ -189,7 +191,7 @@ public class Client {
 			if(inputline.equals("exit")){
 				sc.close();
 				logger.info("shutting down cause told to");
-				System.exit(0);
+				break;
 			}
 			else if(inputline.startsWith("connect")){
 				int port = Integer.parseInt(inputline.substring(7));
