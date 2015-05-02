@@ -1,22 +1,12 @@
 import java.io.BufferedReader;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
-
-import replica.Operation;
-import replica.OperationType;
-
-import util.ProcessHandler;
 
 public class Master {
 
@@ -156,7 +146,8 @@ public class Master {
              * songName. This command should block until the client communicates with
              * one server.
              */
-            String putline = new Operation(OperationType.PUT, songName, URL).toString();
+            //String putline = new Operation(OperationType.PUT, songName, URL).toString();
+            String putline = "PUT=="+songName+"=="+URL;   // because importing Operation is a pain outside of /bin
             processes.get(clientId).out.println(putline);
             blockUntil(processes.get(clientId).in, "WRITTEN");
             numOperations++;
@@ -173,6 +164,7 @@ public class Master {
              * should block until the client communicates with one server.
              */
             processes.get(clientId).out.println("GET"+songName);
+            System.out.print(songName+":");
             readAndPrint(processes.get(clientId).in);
             break;
             
@@ -184,7 +176,8 @@ public class Master {
              * Instruct the client to delete the given songName from the playlist. 
              * This command should block until the client communicates with one server.
              */ 
-            String deleteline = new Operation(OperationType.DELETE, songName, "").toString();
+            //String deleteline = new Operation(OperationType.DELETE, songName, "").toString();
+            String deleteline = "DELETE=="+songName+"==";
             processes.get(clientId).out.println(deleteline);
             blockUntil(processes.get(clientId).in, "WRITTEN");
             numOperations++;

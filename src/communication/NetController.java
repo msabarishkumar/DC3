@@ -34,7 +34,7 @@ import util.Queue;
  */
 public class NetController {
 	
-	public static final int basePort = 10000;
+	public static final int basePort = 11000;
 	
 	public String procNum; // name of this process
 	
