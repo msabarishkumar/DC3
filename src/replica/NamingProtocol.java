@@ -34,6 +34,10 @@ public class NamingProtocol {
 		return id.startsWith("client");
 	}
 	
+	public static String getTempName(int uniqueId){
+		return "temp"+uniqueId;
+	}
+
 	
 	public static String printNodeNames(Map<String, Integer> nodes){
 		StringBuilder f = new StringBuilder();

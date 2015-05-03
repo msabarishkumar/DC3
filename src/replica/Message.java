@@ -11,13 +11,14 @@ public class Message {
 	
 	// Payload which would be different for different type of messages.
 	public final String payLoad;
+
 	
 	Message(String process_id, MessageType type, String payLoad) {
 		this.process_id = process_id; 
 		this.type = type;
 		this.payLoad = payLoad;
 	}
-	
+
 	public static Message parseMsg(String msg) {
 		String[] parts = msg.split(Message.SEPARATOR);
 

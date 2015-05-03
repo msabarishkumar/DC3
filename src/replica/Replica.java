@@ -1,5 +1,6 @@
 package replica;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import java.util.HashSet;
@@ -55,6 +56,7 @@ public class Replica {
 		}
 		else{
 			processId = NamingProtocol.defaultName;
+			paused = true; //wait until you get a name
 		}
 		try {
 			logger = LoggerSetup.create(LoggerSetup.defaultLogLocation() + "/logs/" + uniqueId + ".log");	
@@ -167,8 +169,13 @@ public class Replica {
 				break;
 				
 			case ENTROPY_REQUEST:
+				String[] parts = message.payLoad.split("PORT");
+				MessageWithClock receivedClock = new MessageWithClock(parts[0]);
+				if(!memory.tentativeClock.containsKey(message.process_id)){
+					// you weren't aware of this process, you should include it for future entropy requests
+					controller.connect("temp"+parts[1], Integer.parseInt(parts[1]));
+				}
 				memory.checkUndeliveredMessages();
-				MessageWithClock receivedClock = new MessageWithClock(message.payLoad);
 				Set<Command> allcommands = memory.unseenCommands(receivedClock.vector, Integer.parseInt(receivedClock.message));
 				for(Command commandToSend : allcommands){
 					Message msgtoSend = new Message(processId, MessageType.ENTROPY_COMMAND, commandToSend.toString());
@@ -186,7 +193,6 @@ public class Replica {
 				if(memory.clientDependencyCheck(clientMessage)){
 					logger.info("safe to read");
 					memory.buildPlaylist();
-					logger.info("built");
 					url = playlist.read(clientMessage.message);
 				}
 				else{
@@ -239,7 +245,7 @@ public class Replica {
 					controller.nodes.remove(NamingProtocol.referralName);
 				}
 				logger.info("done naming");
-				antiEntropy();
+				paused = false;
 				break;
 				
 			case RETIRE_OK:
@@ -281,7 +287,6 @@ public class Replica {
 				logger.info("break before I add myself");
 				break;                       // I already know that I've joined )
 			}
-			logger.info("pastbreak");
 			controller.connect(op.process_id, Integer.parseInt(op.port));
 			if (op.process_id.equals("0"))
 				break;    // already added 0 to clock, don't do it again
@@ -362,13 +367,13 @@ public class Replica {
 	/** send entropy request to a random replica you are connected to */
 	private void antiEntropy(){
 		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
-		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString());
+		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString()+"PORT"+uniqueId);
 		controller.sendMsgToRandom(msg.toString());
 	}
 	/** send entropy request to a specific replica you are connected to */
 	private void antiEntropy(String process){
 		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
-		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString());
+		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString()+"PORT"+uniqueId);
 		controller.sendMsg(process, msg.toString());
 	}
 	
@@ -427,11 +432,11 @@ public class Replica {
 				logger.info("log printed");
 				memoryLock.unlock();
 			}
-			else if(inputline.startsWith("NEWREPLICA")){
+			//else if(inputline.startsWith("NEWREPLICA")){
 				// needed for entropy with nodes you haven't seen the JOIN for (which may be necessary, as in test 1_2)
-				int newId = Integer.parseInt(inputline.substring(10));
-				controller.connect("temp"+newId, newId);
-			}
+			//	int newId = Integer.parseInt(inputline.substring(10));
+			//	controller.connect("temp"+newId, newId);
+			//}
 			else if(inputline.equals("EXIT")){
 				logger.info("told by Master to shut down");
 				shutdown();

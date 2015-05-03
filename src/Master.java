@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -18,6 +19,8 @@ public class Master {
 	Set<Integer> awakeServers = new HashSet<Integer>();
 	// a counter so that replicas can know if they are fully caught up during stabilize
 	int numOperations = 0;
+	//
+	HashMap<Integer, HashSet<Integer>> cuts = new HashMap<Integer, HashSet<Integer>>();
 	
     Scanner scan = new Scanner(System.in);
     while (scan.hasNextLine()) {
@@ -34,16 +37,17 @@ public class Master {
             	processes.put(serverId,createFirstServer(serverId));
             }
             else{
-                for(int server : awakeServers){
-                	processes.get(server).out.println("NEWREPLICA"+serverId);
-                }
+                //for(int server : awakeServers){
+                //	processes.get(server).out.println("NEWREPLICA"+serverId);
+                //}
             	int serverToTalkTo = Collections.min(awakeServers);   // choose the oldest server to talk to
             	processes.put(serverId,createServer(serverId, serverToTalkTo));
             }
             awakeServers.add(serverId);
             numOperations++;
+            cuts.put(serverId, new HashSet<Integer>());
             try {
-            	Thread.sleep(50);
+            	Thread.sleep(100);
 			} catch (InterruptedException e) { e.printStackTrace(); }
             break;
             
@@ -58,6 +62,7 @@ public class Master {
             blockUntil(processes.get(serverId).in, "RETIRED");
             awakeServers.remove(serverId);
             numOperations++;
+            cuts.remove(serverId);
             break;
             
             
@@ -81,6 +86,8 @@ public class Master {
              */
 	    	processes.get(id1).out.println("DISCONNECT"+id2);
 	    	processes.get(id2).out.println("DISCONNECT"+id1);
+	    	cuts.get(id1).add(id2);
+	    	cuts.get(id2).add(id1);
             break;
             
             
@@ -93,6 +100,8 @@ public class Master {
              */
 	    	processes.get(id1).out.println("CONNECT"+id2);
 	    	processes.get(id2).out.println("CONNECT"+id1);
+	    	cuts.get(id1).remove(id2);
+	    	cuts.get(id2).remove(id1);
             break;
             
             
@@ -302,6 +311,22 @@ public class Master {
 			  }
 		  } catch (IOException e) { e.printStackTrace(); }
 	  }
+  }
+  
+  /** determines if there is a partition in the replica graph */
+  private static boolean allConnected(HashMap<Integer, HashSet<Integer>> cuts){
+	  Set<Integer> servers = new HashSet<Integer>(cuts.keySet());
+	  for(int i : cuts.keySet()){
+		  if(!cuts.get(0).contains(i)){
+			  servers.remove(i);
+			  for(int j : cuts.keySet()){
+				  if(!cuts.get(i).contains(j)){
+					  servers.remove(j);
+				  }
+			  }
+		  }
+	  }
+	  return servers.isEmpty();
   }
   
 }
