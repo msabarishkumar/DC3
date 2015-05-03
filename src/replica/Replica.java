@@ -184,7 +184,9 @@ public class Replica {
 				MessageWithClock clientMessage = new MessageWithClock(message.payLoad);
 				String url;
 				if(memory.clientDependencyCheck(clientMessage)){
+					logger.info("safe to read");
 					memory.buildPlaylist();
+					logger.info("built");
 					url = playlist.read(clientMessage.message);
 				}
 				else{
@@ -248,7 +250,14 @@ public class Replica {
 					// server who responded becomes primary, doesn't matter who
 				}
 				System.out.println("RETIRED");
-				shutdown();
+				//shutdown();
+				 //pseudo shutdown - freeze this thread with memory locked
+				// so that nothing will happen until Master thread shuts down
+				while(true){
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) { e.printStackTrace(); }
+				}
 				
 			default:
 				logger.warning("received client-side message");
@@ -324,6 +333,7 @@ public class Replica {
 		memoryLock.unlock();
 	}
 	
+	
 	/** send a request periodically 
 	 * TODO: figure out good amount of time */
 	private void entropyThread(){
@@ -339,7 +349,7 @@ public class Replica {
 						memoryLock.unlock();
 					}
 					try {
-						Thread.sleep( 1000 );
+						Thread.sleep( 500 );
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -396,7 +406,7 @@ public class Replica {
 				}
 				else{
 					//wait long enough that you will have gossiped with everyone
-					long waitTillStable = controller.nodes.size() * 1500;
+					long waitTillStable = controller.nodes.size() * 750;
 					logger.info("Received STABILIZE, waiting for " + waitTillStable);
 					memoryLock.unlock();
 					try {

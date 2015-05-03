@@ -1,19 +1,78 @@
-1430686408 || [Thread:1] || INFO || Server myself: Server connection established
-1430686408 || [Thread:1] || INFO || connecting to server 0
-1430686408 || [Thread:1] || INFO || CONTROL: connecting to serverName at 0, client: false
-1430686408 || [Thread:1] || INFO || Sending Message to serverName:	client2--CONNECT--2
-1430686408 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430686408 || [Thread:1] || INFO || Received PUT==eyesOfTexas==utexas.edu from master
-1430686408 || [Thread:1] || INFO || Sending PUT==eyesOfTexas==utexas.edu
-1430686408 || [Thread:1] || INFO || Sending Message to serverName:	client2--OPERATION--PUT==eyesOfTexas==utexas.edu;;;0=0:
-1430686408 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430686408 || [Thread:11] || FINE || Trying to parse: 0--WRITE_RESULT--0=3:
-1430686408 || [Thread:11] || INFO || Write completed
-1430686413 || [Thread:1] || INFO || Received GETeyesOfTexas from master
-1430686413 || [Thread:1] || INFO || Requesting eyesOfTexas
-1430686413 || [Thread:1] || INFO || Sending Message to serverName:	client2--READ--eyesOfTexas;;;0=3:
-1430686413 || [Thread:11] || FINE || Trying to parse: 0--READ_RESULT--cs.utexas.edu;;;0=3:<2,0>=1:
-1430686413 || [Thread:11] || INFO || Received url = cs.utexas.edu
-1430686413 || [Thread:1] || INFO || Received EXIT from master
-1430686413 || [Thread:1] || INFO || shutting down cause told to
-1430686413 || [Thread:1] || INFO || master down, shutting myself down
+1430690166 || [Thread:1] || INFO || Server defaultName: Server connection established
+1430690166 || [Thread:9] || INFO || Server defaultName: New incoming connection accepted from localhost
+1430690166 || [Thread:1] || INFO || CONTROL: connecting to referralName at 0, client: false
+1430690166 || [Thread:1] || INFO || Sending Message to referralName:	defaultName--JOIN--ADD_NODE==defaultName==localhost==2
+1430690166 || [Thread:12] || INFO || Starting entropy thread
+1430690166 || [Thread:12] || INFO || randomly chose referralName
+1430690166 || [Thread:12] || INFO || Sending Message to referralName:	defaultName--ENTROPY_REQUEST--0;;;0=0:
+1430690166 || [Thread:9] || INFO || Server defaultName: New incoming connection accepted from localhost
+1430690166 || [Thread:11] || INFO || Starting message thread
+1430690166 || [Thread:11] || FINE || Trying to parse: 0--NAME--<3,0>
+1430690166 || [Thread:11] || INFO || Have been named: <3,0>
+1430690166 || [Thread:11] || INFO || done naming
+1430690166 || [Thread:11] || INFO || randomly chose 0
+1430690166 || [Thread:11] || INFO || Sending Message to 0:	<3,0>--ENTROPY_REQUEST--0;;;0=0:<3,0>=0:
+1430690166 || [Thread:9] || INFO || Server defaultName: New incoming connection accepted from localhost
+1430690166 || [Thread:11] || FINE || Trying to parse: client4--CONNECT--4
+1430690166 || [Thread:11] || INFO || Connected to client 4
+1430690166 || [Thread:11] || INFO || CONTROL: connecting to client4 at 4, client: true
+1430690166 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_COMMAND---1~~1~~0~~ADD_NODE==0==localhost==0
+1430690166 || [Thread:11] || INFO || Performing: -1~~1~~0~~ADD_NODE==0==localhost==0
+1430690166 || [Thread:11] || INFO || pastbreak
+1430690166 || [Thread:11] || WARNING || already connected to process 0
+1430690166 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_COMMAND--1~~2~~0~~ADD_NODE==<2,0>==localhost==1
+1430690166 || [Thread:11] || INFO || Can't commit yet: 1~~2~~0~~ADD_NODE==<2,0>==localhost==1
+1430690166 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_COMMAND--2~~3~~0~~ADD_NODE==<3,0>==localhost==2
+1430690166 || [Thread:11] || INFO || Can't commit yet: 2~~3~~0~~ADD_NODE==<3,0>==localhost==2
+1430690166 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_COMMAND---1~~2~~0~~ADD_NODE==<2,0>==localhost==1
+1430690166 || [Thread:11] || INFO || Performing: -1~~2~~0~~ADD_NODE==<2,0>==localhost==1
+1430690166 || [Thread:11] || INFO || pastbreak
+1430690166 || [Thread:11] || INFO || CONTROL: connecting to <2,0> at 1, client: false
+1430690166 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_COMMAND---1~~3~~0~~ADD_NODE==<3,0>==localhost==2
+1430690166 || [Thread:11] || INFO || Performing: -1~~3~~0~~ADD_NODE==<3,0>==localhost==2
+1430690166 || [Thread:11] || INFO || break before I add myself
+1430690166 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_COMMAND--0~~1~~0~~ADD_NODE==0==localhost==0
+1430690166 || [Thread:11] || INFO || Committing: 0~~1~~0~~ADD_NODE==0==localhost==0
+1430690166 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_REQUEST--3;;;0=3:<3,0>=0:<2,0>=0:
+1430690166 || [Thread:11] || INFO || Committing: 1~~2~~0~~ADD_NODE==<2,0>==localhost==1
+1430690166 || [Thread:11] || INFO || Committing: 2~~3~~0~~ADD_NODE==<3,0>==localhost==2
+1430690166 || [Thread:12] || INFO || randomly chose <2,0>
+1430690166 || [Thread:12] || INFO || Sending Message to <2,0>:	<3,0>--ENTROPY_REQUEST--3;;;0=3:<3,0>=0:<2,0>=0:
+1430690166 || [Thread:9] || INFO || Server defaultName: New incoming connection accepted from localhost
+1430690166 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_COMMAND---1~~1~~<2,0>~~RETIRE_NODE==<2,0>==localhost==1
+1430690166 || [Thread:11] || INFO || Performing: -1~~1~~<2,0>~~RETIRE_NODE==<2,0>==
+1430690166 || [Thread:11] || INFO || Acknowledging retirement of <2,0>
+1430690166 || [Thread:11] || INFO || Sending Message to <2,0>:	<3,0>--RETIRE_OK--a
+1430690167 || [Thread:12] || INFO || randomly chose 0
+1430690167 || [Thread:12] || INFO || Sending Message to 0:	<3,0>--ENTROPY_REQUEST--3;;;0=3:<3,0>=0:
+1430690167 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_REQUEST--3;;;0=3:<3,0>=0:<2,0>=0:
+1430690167 || [Thread:11] || INFO || Sending Message to 0:	<3,0>--ENTROPY_COMMAND---1~~1~~<2,0>~~RETIRE_NODE==<2,0>==
+1430690167 || [Thread:12] || INFO || randomly chose 0
+1430690167 || [Thread:12] || INFO || Sending Message to 0:	<3,0>--ENTROPY_REQUEST--3;;;0=3:<3,0>=0:
+1430690167 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_COMMAND--3~~1~~<2,0>~~RETIRE_NODE==<2,0>==
+1430690167 || [Thread:11] || INFO || Committing: 3~~1~~<2,0>~~RETIRE_NODE==<2,0>==
+1430690168 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_REQUEST--4;;;0=3:<3,0>=0:
+1430690168 || [Thread:12] || INFO || randomly chose 0
+1430690168 || [Thread:12] || INFO || Sending Message to 0:	<3,0>--ENTROPY_REQUEST--4;;;0=3:<3,0>=0:
+1430690168 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_REQUEST--4;;;0=3:<3,0>=0:
+1430690168 || [Thread:12] || INFO || randomly chose 0
+1430690168 || [Thread:12] || INFO || Sending Message to 0:	<3,0>--ENTROPY_REQUEST--4;;;0=3:<3,0>=0:
+1430690169 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_REQUEST--4;;;0=3:<3,0>=0:
+1430690169 || [Thread:12] || INFO || randomly chose 0
+1430690169 || [Thread:12] || INFO || Sending Message to 0:	<3,0>--ENTROPY_REQUEST--4;;;0=3:<3,0>=0:
+1430690169 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_REQUEST--4;;;0=3:<3,0>=0:
+1430690169 || [Thread:12] || INFO || randomly chose 0
+1430690169 || [Thread:12] || INFO || Sending Message to 0:	<3,0>--ENTROPY_REQUEST--4;;;0=3:<3,0>=0:
+1430690170 || [Thread:11] || FINE || Trying to parse: 0--ENTROPY_REQUEST--4;;;0=3:<3,0>=0:
+1430690170 || [Thread:12] || INFO || randomly chose 0
+1430690170 || [Thread:12] || INFO || Sending Message to 0:	<3,0>--ENTROPY_REQUEST--4;;;0=3:<3,0>=0:
+1430690170 || [Thread:1] || INFO || Received STABILIZE4 from Master
+1430690170 || [Thread:1] || INFO || Received STABILIZE, and am currently stable
+1430690170 || [Thread:11] || FINE || Trying to parse: client4--READ--a;;;0=0:
+1430690170 || [Thread:11] || INFO || performing dependency check
+1430690170 || [Thread:11] || INFO || safe to read
+1430690170 || [Thread:11] || INFO || built
+1430690170 || [Thread:11] || INFO || responding to READ with ERR_KEY
+1430690170 || [Thread:11] || INFO || Sending Message to client4:	<3,0>--READ_RESULT--ERR_KEY;;;0=3:<3,0>=0:
+1430690170 || [Thread:1] || INFO || Received EXIT from Master
+1430690170 || [Thread:1] || INFO || told by Master to shut down

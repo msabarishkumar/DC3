@@ -125,6 +125,9 @@ public class Master {
              * time that this function blocks for should increase linearly with the 
              * number of servers in the system.
              */
+        	try {
+				Thread.sleep(500);       // give the servers a chance to stabilize, so maybe you won't have to wait as long
+			} catch (InterruptedException e) { e.printStackTrace(); }
         	for(int i : awakeServers){
         		processes.get(i).out.println("STABILIZE" + numOperations);
         		blockUntil(processes.get(i).in, "STABLE");

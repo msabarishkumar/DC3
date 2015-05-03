@@ -184,6 +184,7 @@ public class Memory {
 	
 	/** Compare client's current VC to yours*/
 	boolean clientDependencyCheck(MessageWithClock message){
+		replica.logger.info("performing dependency check");
 		//return VectorClock.compareClocks(message.vector.clock, tentativeClock);
 		HashMap<String, Long> clientclock = message.vector.clock;
 		for(String s : clientclock.keySet()){

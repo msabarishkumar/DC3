@@ -1,19 +1,14 @@
-1430686408 || [Thread:1] || INFO || Server myself: Server connection established
-1430686408 || [Thread:1] || INFO || connecting to server 1
-1430686408 || [Thread:1] || INFO || CONTROL: connecting to serverName at 1, client: false
-1430686408 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430686408 || [Thread:1] || INFO || Sending Message to serverName:	client3--CONNECT--3
-1430686408 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430686408 || [Thread:1] || INFO || Received PUT==eyesOfTexas==cs.utexas.edu from master
-1430686408 || [Thread:1] || INFO || Sending PUT==eyesOfTexas==cs.utexas.edu
-1430686408 || [Thread:1] || INFO || Sending Message to serverName:	client3--OPERATION--PUT==eyesOfTexas==cs.utexas.edu;;;0=0:
-1430686408 || [Thread:11] || FINE || Trying to parse: <2,0>--WRITE_RESULT--<2,0>=1:
-1430686408 || [Thread:11] || INFO || Write completed
-1430686413 || [Thread:1] || INFO || Received GETeyesOfTexas from master
-1430686413 || [Thread:1] || INFO || Requesting eyesOfTexas
-1430686413 || [Thread:1] || INFO || Sending Message to serverName:	client3--READ--eyesOfTexas;;;0=0:<2,0>=1:
-1430686413 || [Thread:11] || FINE || Trying to parse: <2,0>--READ_RESULT--cs.utexas.edu;;;0=3:<2,0>=1:
-1430686413 || [Thread:11] || INFO || Received url = cs.utexas.edu
-1430686413 || [Thread:1] || INFO || Received EXIT from master
-1430686413 || [Thread:1] || INFO || shutting down cause told to
-1430686413 || [Thread:1] || INFO || master down, shutting myself down
+1430690166 || [Thread:1] || INFO || Server myself: Server connection established
+1430690166 || [Thread:1] || INFO || connecting to server 0
+1430690166 || [Thread:1] || INFO || CONTROL: connecting to serverName at 0, client: false
+1430690166 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430690166 || [Thread:1] || INFO || Sending Message to serverName:	client3--CONNECT--3
+1430690166 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430690170 || [Thread:1] || INFO || Received GETa from master
+1430690170 || [Thread:1] || INFO || Requesting a
+1430690170 || [Thread:1] || INFO || Sending Message to serverName:	client3--READ--a;;;0=0:
+1430690170 || [Thread:11] || FINE || Trying to parse: 0--READ_RESULT--ERR_KEY;;;0=3:<3,0>=0:
+1430690170 || [Thread:11] || INFO || Received url = ERR_KEY
+1430690170 || [Thread:1] || INFO || Received EXIT from master
+1430690170 || [Thread:1] || INFO || shutting down cause told to
+1430690170 || [Thread:1] || INFO || master down, shutting myself down
