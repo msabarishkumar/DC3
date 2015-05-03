@@ -224,17 +224,17 @@ public class Memory {
 	private String printCommandForLog(Command c){
 		StringBuilder builder = new StringBuilder();
 		builder.append(c.operation.type.name());
-		builder.append(':');
+		builder.append(":(");
 		builder.append(c.operation.song);
 		if(c.operation.url != null){
 			builder.append(", ");
 			builder.append(c.operation.url);
 		}
 		if(c.CSN == -1){
-			builder.append(":FALSE");
+			builder.append("):FALSE");
 		}
 		else{
-			builder.append(":TRUE");
+			builder.append("):TRUE");
 		}
 		return builder.toString();
 	}
