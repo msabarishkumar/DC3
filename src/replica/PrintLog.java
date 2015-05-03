@@ -52,6 +52,7 @@ public class PrintLog {
 			}
 			System.out.println(line);
 		}
+		System.out.println("-END");
 	}
 	
 	

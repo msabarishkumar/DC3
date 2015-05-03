@@ -51,6 +51,7 @@ public class Client {
 		me.listenToMaster();
 		
 		me.controller.shutdown();
+		System.exit(1);
 	}
 	
 	/** client only connects to one server at a time, but must be able to change the server in question */
@@ -154,7 +155,7 @@ public class Client {
 		Scanner sc = new Scanner(System.in);
 		while(sc.hasNext()){
 			String inputline = sc.nextLine();
-			logger.info("Received " + inputline + "from master");
+			logger.info("Received " + inputline + " from master");
 			
 			if(inputline.equals("EXIT")){
 				sc.close();

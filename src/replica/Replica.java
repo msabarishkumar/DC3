@@ -190,6 +190,7 @@ public class Replica {
 				else{
 					url = "ERR_DEP";
 				}
+				logger.info("responding to READ with "+url);
 				MessageWithClock response = new MessageWithClock(url,memory.tentativeClock);
 				Message msgtoSend = new Message(processId, MessageType.READ_RESULT, response.toString());
 				controller.sendMsg(message.process_id, msgtoSend.toString());
@@ -412,9 +413,9 @@ public class Replica {
 			else if(inputline.equals("PRINTLOG")){
 				memoryLock.lock();
 				memory.checkUndeliveredMessages();
-				memory.pLog.print();
+				memory.printLog();
+				logger.info("log printed");
 				memoryLock.unlock();
-				System.out.println("-END");
 			}
 			else if(inputline.startsWith("NEWREPLICA")){
 				// needed for entropy with nodes you haven't seen the JOIN for (which may be necessary, as in test 1_2)
@@ -454,7 +455,7 @@ public class Replica {
 				memory.buildPlaylist();
 			}
 			else if(inputline.equals("printlog")){
-				memory.pLog.print();
+				memory.printLog();
 			}
 			else if(inputline.equals("printlist")){
 				System.out.println(playlist.toString());

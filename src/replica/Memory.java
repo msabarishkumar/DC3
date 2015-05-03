@@ -1,71 +1,22 @@
 package replica;
 
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class Memory {
 	// This class has no thread or locks - synchrony must be handled outside
-	
-	public static void main(String[] args){
-		String name = "o";
-		String name2  = "<3,o>";
-		Replica rex = new Replica(1,false);
-		Memory me = rex.memory;
-		
-		Operation op1 = Operation.operationFromString("PUT==lo==hi");
-		Command c1 = new Command(-1, 1, name, op1);
-		Operation op2 = Operation.operationFromString("PUT==lo==hurr");
-		Command c2 = new Command(-1, 2, name, op2);		
-		Operation op3 = new AddRetireOperation(OperationType.ADD_NODE,name2,"localhost","3");
-		Command c3 = new Command(-1, 3, name, op3);
-		Operation op4 = Operation.operationFromString("PUT==med==sand");
-		Command c4 = new Command(-1, 1, name2, op4);
-		
-		Command c5 = new Command(0,1,name,op1);
-		
-		me.tentativeClock.put("o", (long) 0);
-		me.committedClock.put("o", (long) 0);
-		
-		me.acceptCommand(c2);
-		me.garbageCollect();
-		me.printLogs();
-		me.printClocks();
-		System.out.println(rex.playlist.toString());
-		System.out.println(rex.committedPlaylist.toString());
-		
-		me.acceptCommand(c1);
-		me.checkUndeliveredMessages();
-		me.printLogs();
-		me.printClocks();
-		System.out.println(rex.playlist.toString());
-		System.out.println(rex.committedPlaylist.toString());
-		
-		me.acceptCommand(c5);
-		me.printLogs();
-		me.printClocks();
-		System.out.println(rex.playlist.toString());
-		System.out.println(rex.committedPlaylist.toString());
-		
-		me.buildPlaylist();
-		me.printLogs();
-		me.printClocks();
-		System.out.println(rex.playlist.toString());
-		System.out.println(rex.committedPlaylist.toString());
-		me.pLog.print();
-	}
-	
 	
 	public HashMap<String, Long> tentativeClock = new HashMap<String, Long>();
 	public HashMap<String, Long> committedClock = new HashMap<String, Long>();
 	public List<Command> committedWriteLog = new ArrayList<Command>();
 	public List<Command> deliveredWriteLog = new LinkedList<Command>();
 	public List<Command> undeliveredWriteLog = new LinkedList<Command>();
-	public PrintLog pLog = new PrintLog();
+	//public PrintLog pLog = new PrintLog();
 	public int csn = 0;
 	
 	public Replica replica;
@@ -84,7 +35,7 @@ public class Memory {
 			replica.logger.info("Committing: "+command.toString());
 			committedClock.put(command.serverId, command.acceptStamp);
 			committedWriteLog.add(csn, command);
-			pLog.add(command);
+			//pLog.add(command);
 			csn++;
 			return true;
 		}
@@ -104,7 +55,7 @@ public class Memory {
 			deliveredWriteLog.add(command);
 			tentativeClock.put(command.serverId, command.acceptStamp);
 			replica.performOperation(command.operation);
-			pLog.add(command);
+			//pLog.add(command);
 			if(replica.isPrimary){    // make a committed version
 				commit(command);
 			}
@@ -151,13 +102,17 @@ public class Memory {
 	}
 	
 	/** remove elements from tentative log if they have been committed
-	 *  dangerous if not all commands have been seen by everyone, only use during stabilization */
+	 *  dangerous if not all commands have been seen by everyone, only use during stabilization
+	 *  EDIT no longer dangerous since add/retire commands are always kept */
 	public void garbageCollect(){
 		List<Command> logClone = new LinkedList<Command>(deliveredWriteLog);
 		deliveredWriteLog.clear();
 		for(Command command : logClone){
-			if(completeV(committedClock, command.serverId) < command.acceptStamp){
-					deliveredWriteLog.add(command);
+			if(command.operation instanceof AddRetireOperation){   // don't garbage collect these, not included in log anyway
+				deliveredWriteLog.add(command);
+			}
+			else if(completeV(committedClock, command.serverId) < command.acceptStamp){
+				deliveredWriteLog.add(command);
 			}
 		}
 	}
@@ -231,6 +186,42 @@ public class Memory {
 		for(Command c : deliveredWriteLog){
 			replica.playlist.performOperation(c.operation);
 		}
+	}
+	
+	/** new way to answer printLog, prints committed messages first then delivered messages in decided order*/
+	void printLog(){
+		garbageCollect();
+		Collections.sort(deliveredWriteLog, comparator);
+		Collections.sort(committedWriteLog, comparator);
+		for(Command command : committedWriteLog){
+			if((command != null) && !(command.operation instanceof AddRetireOperation)){
+				System.out.println(printCommandForLog(command));
+			}
+		}
+		for(Command command : deliveredWriteLog){
+			if((command != null) && !(command.operation instanceof AddRetireOperation)){
+				System.out.println(printCommandForLog(command));
+			}
+		}
+		System.out.println("-END");
+	}
+	
+	private String printCommandForLog(Command c){
+		StringBuilder builder = new StringBuilder();
+		builder.append(c.operation.type.name());
+		builder.append(':');
+		builder.append(c.operation.song);
+		if(c.operation.url != null){
+			builder.append(", ");
+			builder.append(c.operation.url);
+		}
+		if(c.CSN == -1){
+			builder.append(":FALSE");
+		}
+		else{
+			builder.append(":TRUE");
+		}
+		return builder.toString();
 	}
 	
 	
