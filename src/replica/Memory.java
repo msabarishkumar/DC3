@@ -103,7 +103,8 @@ public class Memory {
 	
 	/** remove elements from tentative log if they have been committed
 	 *  dangerous if not all commands have been seen by everyone, only use during stabilization
-	 *  EDIT no longer dangerous since add/retire commands are always kept */
+	 *  EDIT no longer dangerous since add/retire commands are always kept
+	 *  EDIT2 no longer used */
 	public void garbageCollect(){
 		List<Command> logClone = new LinkedList<Command>(deliveredWriteLog);
 		deliveredWriteLog.clear();
@@ -115,6 +116,22 @@ public class Memory {
 				deliveredWriteLog.add(command);
 			}
 		}
+	}
+	
+	/** creates shallow clone of deliveredWriteLog that doesn't include committed commands
+	 *  needed for printing, preferable to old garbageCollect because old commands may still be needed for entropy */
+	public List<Command> garbageCollectClone(){
+		List<Command> logClone = new LinkedList<Command>();
+		for(Command command : deliveredWriteLog){
+			if(command.operation instanceof AddRetireOperation){
+				/// don't need these for printing
+			}
+			if(completeV(committedClock, command.serverId) < command.acceptStamp){
+				logClone.add(command);
+			}
+		}
+		Collections.sort(logClone, comparator);
+		return logClone;
 	}
 	
 	/** commit commands, only called by primary */
@@ -179,26 +196,24 @@ public class Memory {
 	
 	/** recreates play list in a set order, so that everyone's is eventually the same */
 	void buildPlaylist(){
-		garbageCollect(); // remove commands that were already used on CommittedPlaylist
-		Collections.sort(deliveredWriteLog, comparator);
+		List<Command> deliverClone = garbageCollectClone(); // remove commands that were already used on CommittedPlaylist
 		// if all commands have been seen by all servers, then sorted command set should be the same
 		replica.playlist = replica.committedPlaylist.clone();
-		for(Command c : deliveredWriteLog){
+		for(Command c : deliverClone){
 			replica.playlist.performOperation(c.operation);
 		}
 	}
 	
 	/** new way to answer printLog, prints committed messages first then delivered messages in decided order*/
 	void printLog(){
-		garbageCollect();
-		Collections.sort(deliveredWriteLog, comparator);
+		List<Command> deliverClone = garbageCollectClone();
 		Collections.sort(committedWriteLog, comparator);
 		for(Command command : committedWriteLog){
 			if((command != null) && !(command.operation instanceof AddRetireOperation)){
 				System.out.println(printCommandForLog(command));
 			}
 		}
-		for(Command command : deliveredWriteLog){
+		for(Command command : deliverClone){
 			if((command != null) && !(command.operation instanceof AddRetireOperation)){
 				System.out.println(printCommandForLog(command));
 			}

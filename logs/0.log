@@ -1,291 +1,249 @@
-1430684481 || [Thread:1] || INFO || Server 0: Server connection established
-1430684481 || [Thread:9] || INFO || Server 0: New incoming connection accepted from localhost
-1430684481 || [Thread:1] || INFO || Performing: -1~~1~~0~~ADD_NODE==0==localhost==0
-1430684481 || [Thread:1] || INFO || break before I add myself
-1430684481 || [Thread:1] || INFO || As primary, creating: 0~~1~~0~~ADD_NODE==0==localhost==0
-1430684481 || [Thread:1] || INFO || Committing: 0~~1~~0~~ADD_NODE==0==localhost==0
-1430684481 || [Thread:11] || INFO || Starting message thread
-1430684481 || [Thread:12] || INFO || Starting entropy thread
-1430684482 || [Thread:9] || INFO || Server 0: New incoming connection accepted from localhost
-1430684482 || [Thread:11] || FINE || Trying to parse: defaultName--JOIN--ADD_NODE==defaultName==localhost==1
-1430684482 || [Thread:11] || INFO || Naming server at port 1: <2,0>
-1430684482 || [Thread:11] || INFO || Performing: -1~~2~~0~~ADD_NODE==<2,0>==localhost==1
-1430684482 || [Thread:11] || INFO || pastbreak
-1430684482 || [Thread:11] || INFO || CONTROL: connecting to <2,0> at 1, client: false
-1430684482 || [Thread:11] || INFO || As primary, creating: 1~~2~~0~~ADD_NODE==<2,0>==localhost==1
-1430684482 || [Thread:11] || INFO || Committing: 1~~2~~0~~ADD_NODE==<2,0>==localhost==1
-1430684482 || [Thread:11] || INFO || Sending Message to <2,0>:	0--NAME--<2,0>
-1430684482 || [Thread:11] || FINE || Trying to parse: defaultName--ENTROPY_REQUEST--0;;;0=0:
-1430684482 || [Thread:11] || INFO || Tried to send to defaultName, but don't have a connection
-1430684482 || [Thread:11] || INFO || Tried to send to defaultName, but don't have a connection
-1430684482 || [Thread:11] || INFO || Tried to send to defaultName, but don't have a connection
-1430684482 || [Thread:11] || INFO || Tried to send to defaultName, but don't have a connection
-1430684482 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--0;;;0=0:<2,0>=0:
-1430684482 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND--0~~1~~0~~ADD_NODE==0==localhost==0
-1430684482 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND---1~~1~~0~~ADD_NODE==0==localhost==0
-1430684482 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND---1~~2~~0~~ADD_NODE==<2,0>==localhost==1
-1430684482 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND--1~~2~~0~~ADD_NODE==<2,0>==localhost==1
-1430684482 || [Thread:12] || INFO || randomly chose <2,0>
-1430684482 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684483 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684483 || [Thread:12] || INFO || randomly chose <2,0>
-1430684483 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684483 || [Thread:9] || INFO || Server 0: New incoming connection accepted from localhost
-1430684483 || [Thread:11] || FINE || Trying to parse: client2--CONNECT--2
-1430684483 || [Thread:11] || INFO || Connected to client 2
-1430684483 || [Thread:11] || INFO || CONTROL: connecting to client2 at 2, client: true
-1430684484 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684484 || [Thread:12] || INFO || randomly chose <2,0>
-1430684484 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684485 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684485 || [Thread:12] || INFO || randomly chose <2,0>
-1430684485 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684486 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684486 || [Thread:12] || INFO || randomly chose <2,0>
-1430684486 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684487 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684487 || [Thread:12] || INFO || randomly chose <2,0>
-1430684487 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684488 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684488 || [Thread:12] || INFO || randomly chose <2,0>
-1430684488 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684489 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684489 || [Thread:12] || INFO || randomly chose <2,0>
-1430684489 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684490 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684490 || [Thread:12] || INFO || randomly chose <2,0>
-1430684490 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684491 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684491 || [Thread:12] || INFO || randomly chose <2,0>
-1430684491 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684492 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684492 || [Thread:12] || INFO || randomly chose <2,0>
-1430684492 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684493 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684493 || [Thread:12] || INFO || randomly chose <2,0>
-1430684493 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684494 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684494 || [Thread:12] || INFO || randomly chose <2,0>
-1430684494 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684495 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684495 || [Thread:12] || INFO || randomly chose <2,0>
-1430684495 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684496 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684496 || [Thread:12] || INFO || randomly chose <2,0>
-1430684496 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684497 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684497 || [Thread:12] || INFO || randomly chose <2,0>
-1430684497 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684498 || [Thread:1] || INFO || Received DISCONNECT1 from Master
-1430684498 || [Thread:1] || INFO || CONTROL: disconnecting <2,0> at port 1
-1430684498 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684498 || [Thread:12] || INFO || randomly chose <2,0>
-1430684498 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684499 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684499 || [Thread:12] || INFO || randomly chose <2,0>
-1430684499 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684500 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684500 || [Thread:12] || INFO || randomly chose <2,0>
-1430684500 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684501 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684501 || [Thread:12] || INFO || randomly chose <2,0>
-1430684501 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684502 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684502 || [Thread:12] || INFO || randomly chose <2,0>
-1430684502 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684503 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684503 || [Thread:12] || INFO || randomly chose <2,0>
-1430684503 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684504 || [Thread:12] || INFO || randomly chose <2,0>
-1430684504 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684505 || [Thread:12] || INFO || randomly chose <2,0>
-1430684505 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684506 || [Thread:12] || INFO || randomly chose <2,0>
-1430684506 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684507 || [Thread:12] || INFO || randomly chose <2,0>
-1430684507 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684508 || [Thread:12] || INFO || randomly chose <2,0>
-1430684508 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684509 || [Thread:12] || INFO || randomly chose <2,0>
-1430684509 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684510 || [Thread:12] || INFO || randomly chose <2,0>
-1430684510 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684511 || [Thread:12] || INFO || randomly chose <2,0>
-1430684511 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684511 || [Thread:11] || FINE || Trying to parse: client2--OPERATION--PUT==a==b;;;0=0:
-1430684511 || [Thread:11] || INFO || Performing: -1~~3~~0~~PUT==a==b
-1430684511 || [Thread:11] || INFO || As primary, creating: 2~~3~~0~~PUT==a==b
-1430684511 || [Thread:11] || INFO || Committing: 2~~3~~0~~PUT==a==b
-1430684511 || [Thread:11] || INFO || Sending Message to client2:	0--WRITE_RESULT--0=3:
-1430684512 || [Thread:12] || INFO || randomly chose <2,0>
-1430684512 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684513 || [Thread:12] || INFO || randomly chose <2,0>
-1430684513 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684514 || [Thread:12] || INFO || randomly chose <2,0>
-1430684514 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684515 || [Thread:12] || INFO || randomly chose <2,0>
-1430684515 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684515 || [Thread:11] || FINE || Trying to parse: client2--READ--a;;;0=3:
-1430684515 || [Thread:11] || INFO || responding to READ with b
-1430684515 || [Thread:11] || INFO || Sending Message to client2:	0--READ_RESULT--b;;;0=3:<2,0>=0:
-1430684516 || [Thread:12] || INFO || randomly chose <2,0>
-1430684516 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684517 || [Thread:12] || INFO || randomly chose <2,0>
-1430684517 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684518 || [Thread:12] || INFO || randomly chose <2,0>
-1430684518 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684519 || [Thread:12] || INFO || randomly chose <2,0>
-1430684519 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684520 || [Thread:12] || INFO || randomly chose <2,0>
-1430684520 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684521 || [Thread:12] || INFO || randomly chose <2,0>
-1430684521 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684522 || [Thread:12] || INFO || randomly chose <2,0>
-1430684522 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684523 || [Thread:12] || INFO || randomly chose <2,0>
-1430684523 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684524 || [Thread:12] || INFO || randomly chose <2,0>
-1430684524 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684525 || [Thread:12] || INFO || randomly chose <2,0>
-1430684525 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684526 || [Thread:12] || INFO || randomly chose <2,0>
-1430684526 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684527 || [Thread:12] || INFO || randomly chose <2,0>
-1430684527 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684528 || [Thread:12] || INFO || randomly chose <2,0>
-1430684528 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684529 || [Thread:12] || INFO || randomly chose <2,0>
-1430684529 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684530 || [Thread:12] || INFO || randomly chose <2,0>
-1430684530 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684531 || [Thread:12] || INFO || randomly chose <2,0>
-1430684531 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684532 || [Thread:1] || INFO || Received PRINTLOG from Master
-1430684532 || [Thread:1] || INFO || log printed
-1430684532 || [Thread:12] || INFO || randomly chose <2,0>
-1430684532 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684533 || [Thread:12] || INFO || randomly chose <2,0>
-1430684533 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684534 || [Thread:12] || INFO || randomly chose <2,0>
-1430684534 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684535 || [Thread:12] || INFO || randomly chose <2,0>
-1430684535 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684536 || [Thread:12] || INFO || randomly chose <2,0>
-1430684536 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684537 || [Thread:12] || INFO || randomly chose <2,0>
-1430684537 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684538 || [Thread:12] || INFO || randomly chose <2,0>
-1430684538 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684539 || [Thread:12] || INFO || randomly chose <2,0>
-1430684539 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684540 || [Thread:12] || INFO || randomly chose <2,0>
-1430684540 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684540 || [Thread:1] || INFO || Received RETIRE from Master
-1430684540 || [Thread:1] || INFO || Performing: -1~~4~~0~~RETIRE_NODE==0==localhost==0
-1430684540 || [Thread:1] || INFO || As primary, creating: 3~~4~~0~~RETIRE_NODE==0==localhost==0
-1430684540 || [Thread:1] || INFO || Committing: 3~~4~~0~~RETIRE_NODE==0==localhost==0
-1430684540 || [Thread:1] || INFO || Retiring at next opportunity
-1430684541 || [Thread:12] || INFO || randomly chose <2,0>
-1430684541 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684542 || [Thread:12] || INFO || randomly chose <2,0>
-1430684542 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684543 || [Thread:12] || INFO || randomly chose <2,0>
-1430684543 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684544 || [Thread:12] || INFO || randomly chose <2,0>
-1430684544 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684545 || [Thread:12] || INFO || randomly chose <2,0>
-1430684545 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684546 || [Thread:12] || INFO || randomly chose <2,0>
-1430684546 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684547 || [Thread:12] || INFO || randomly chose <2,0>
-1430684547 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684548 || [Thread:12] || INFO || randomly chose <2,0>
-1430684548 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684549 || [Thread:12] || INFO || randomly chose <2,0>
-1430684549 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684550 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684550 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684550 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684550 || [Thread:12] || INFO || randomly chose <2,0>
-1430684550 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684551 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684551 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684551 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684551 || [Thread:12] || INFO || randomly chose <2,0>
-1430684551 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684552 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684552 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684552 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684552 || [Thread:12] || INFO || randomly chose <2,0>
-1430684552 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684553 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684553 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684553 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684553 || [Thread:12] || INFO || randomly chose <2,0>
-1430684553 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
-1430684553 || [Thread:1] || INFO || Received CONNECT1 from Master
-1430684553 || [Thread:1] || INFO || CONTROL: reconnecting <2,0> at port 1
-1430684554 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
-1430684554 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND--3~~4~~0~~RETIRE_NODE==0==localhost==0
-1430684554 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND--2~~3~~0~~PUT==a==b
-1430684554 || [Thread:12] || INFO || randomly chose <2,0>
-1430684554 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684555 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684555 || [Thread:12] || INFO || randomly chose <2,0>
-1430684555 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684556 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684556 || [Thread:12] || INFO || randomly chose <2,0>
-1430684556 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684557 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684557 || [Thread:12] || INFO || randomly chose <2,0>
-1430684557 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684558 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684558 || [Thread:12] || INFO || randomly chose <2,0>
-1430684558 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684559 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684559 || [Thread:12] || INFO || randomly chose <2,0>
-1430684559 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684560 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684560 || [Thread:12] || INFO || randomly chose <2,0>
-1430684560 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684561 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684561 || [Thread:12] || INFO || randomly chose <2,0>
-1430684561 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684561 || [Thread:1] || INFO || Received PRINTLOG from Master
-1430684561 || [Thread:1] || INFO || log printed
-1430684562 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684562 || [Thread:12] || INFO || randomly chose <2,0>
-1430684562 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684563 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684563 || [Thread:12] || INFO || randomly chose <2,0>
-1430684563 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684564 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684564 || [Thread:12] || INFO || randomly chose <2,0>
-1430684564 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684565 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684565 || [Thread:12] || INFO || randomly chose <2,0>
-1430684565 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684566 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684566 || [Thread:12] || INFO || randomly chose <2,0>
-1430684566 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684567 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684567 || [Thread:12] || INFO || randomly chose <2,0>
-1430684567 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684568 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684568 || [Thread:12] || INFO || randomly chose <2,0>
-1430684568 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684569 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684569 || [Thread:12] || INFO || randomly chose <2,0>
-1430684569 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684570 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684570 || [Thread:12] || INFO || randomly chose <2,0>
-1430684570 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684571 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684571 || [Thread:12] || INFO || randomly chose <2,0>
-1430684571 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684572 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684572 || [Thread:12] || INFO || randomly chose <2,0>
-1430684572 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
-1430684573 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--4;;;0=2:<2,0>=0:
-1430684573 || [Thread:12] || INFO || randomly chose <2,0>
-1430684573 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--4;;;<2,0>=0:
+1430686008 || [Thread:1] || INFO || Server 0: Server connection established
+1430686008 || [Thread:1] || INFO || Performing: -1~~1~~0~~ADD_NODE==0==localhost==0
+1430686008 || [Thread:1] || INFO || break before I add myself
+1430686008 || [Thread:1] || INFO || As primary, creating: 0~~1~~0~~ADD_NODE==0==localhost==0
+1430686008 || [Thread:9] || INFO || Server 0: New incoming connection accepted from localhost
+1430686008 || [Thread:1] || INFO || Committing: 0~~1~~0~~ADD_NODE==0==localhost==0
+1430686008 || [Thread:11] || INFO || Starting message thread
+1430686008 || [Thread:12] || INFO || Starting entropy thread
+1430686010 || [Thread:9] || INFO || Server 0: New incoming connection accepted from localhost
+1430686010 || [Thread:11] || FINE || Trying to parse: client2--CONNECT--2
+1430686010 || [Thread:11] || INFO || Connected to client 2
+1430686010 || [Thread:11] || INFO || CONTROL: connecting to client2 at 2, client: true
+1430686011 || [Thread:9] || INFO || Server 0: New incoming connection accepted from localhost
+1430686011 || [Thread:11] || FINE || Trying to parse: defaultName--JOIN--ADD_NODE==defaultName==localhost==1
+1430686011 || [Thread:11] || INFO || Naming server at port 1: <2,0>
+1430686011 || [Thread:11] || INFO || Performing: -1~~2~~0~~ADD_NODE==<2,0>==localhost==1
+1430686011 || [Thread:11] || INFO || pastbreak
+1430686011 || [Thread:11] || INFO || CONTROL: connecting to <2,0> at 1, client: false
+1430686011 || [Thread:11] || INFO || As primary, creating: 1~~2~~0~~ADD_NODE==<2,0>==localhost==1
+1430686011 || [Thread:11] || INFO || Committing: 1~~2~~0~~ADD_NODE==<2,0>==localhost==1
+1430686011 || [Thread:11] || INFO || Sending Message to <2,0>:	0--NAME--<2,0>
+1430686011 || [Thread:11] || FINE || Trying to parse: defaultName--ENTROPY_REQUEST--0;;;0=0:
+1430686011 || [Thread:11] || INFO || Tried to send to defaultName, but don't have a connection
+1430686011 || [Thread:11] || INFO || Tried to send to defaultName, but don't have a connection
+1430686011 || [Thread:11] || INFO || Tried to send to defaultName, but don't have a connection
+1430686011 || [Thread:11] || INFO || Tried to send to defaultName, but don't have a connection
+1430686011 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--0;;;0=0:<2,0>=0:
+1430686011 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND---1~~1~~0~~ADD_NODE==0==localhost==0
+1430686011 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND---1~~2~~0~~ADD_NODE==<2,0>==localhost==1
+1430686011 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND--1~~2~~0~~ADD_NODE==<2,0>==localhost==1
+1430686011 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND--0~~1~~0~~ADD_NODE==0==localhost==0
+1430686011 || [Thread:12] || INFO || randomly chose <2,0>
+1430686011 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686012 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686012 || [Thread:12] || INFO || randomly chose <2,0>
+1430686012 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686013 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686013 || [Thread:12] || INFO || randomly chose <2,0>
+1430686013 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686014 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686014 || [Thread:12] || INFO || randomly chose <2,0>
+1430686014 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686015 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686015 || [Thread:12] || INFO || randomly chose <2,0>
+1430686015 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686016 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686016 || [Thread:12] || INFO || randomly chose <2,0>
+1430686016 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686017 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686017 || [Thread:12] || INFO || randomly chose <2,0>
+1430686017 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686017 || [Thread:1] || INFO || Received DISCONNECT1 from Master
+1430686017 || [Thread:1] || INFO || CONTROL: disconnecting <2,0> at port 1
+1430686018 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686018 || [Thread:12] || INFO || randomly chose <2,0>
+1430686018 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686019 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686019 || [Thread:12] || INFO || randomly chose <2,0>
+1430686019 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686020 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686020 || [Thread:12] || INFO || randomly chose <2,0>
+1430686020 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686021 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686021 || [Thread:12] || INFO || randomly chose <2,0>
+1430686021 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686022 || [Thread:12] || INFO || randomly chose <2,0>
+1430686022 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686023 || [Thread:12] || INFO || randomly chose <2,0>
+1430686023 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686024 || [Thread:12] || INFO || randomly chose <2,0>
+1430686024 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686024 || [Thread:11] || FINE || Trying to parse: client2--OPERATION--PUT==a==b;;;0=0:
+1430686024 || [Thread:11] || INFO || Performing: -1~~3~~0~~PUT==a==b
+1430686024 || [Thread:11] || INFO || As primary, creating: 2~~3~~0~~PUT==a==b
+1430686024 || [Thread:11] || INFO || Committing: 2~~3~~0~~PUT==a==b
+1430686024 || [Thread:11] || INFO || Sending Message to client2:	0--WRITE_RESULT--0=3:
+1430686025 || [Thread:12] || INFO || randomly chose <2,0>
+1430686025 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686026 || [Thread:12] || INFO || randomly chose <2,0>
+1430686026 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686027 || [Thread:12] || INFO || randomly chose <2,0>
+1430686027 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686028 || [Thread:12] || INFO || randomly chose <2,0>
+1430686028 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686029 || [Thread:12] || INFO || randomly chose <2,0>
+1430686029 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686030 || [Thread:1] || INFO || Received CONNECT1 from Master
+1430686030 || [Thread:1] || INFO || CONTROL: reconnecting <2,0> at port 1
+1430686030 || [Thread:12] || INFO || randomly chose <2,0>
+1430686030 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686031 || [Thread:12] || INFO || randomly chose <2,0>
+1430686031 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686032 || [Thread:12] || INFO || randomly chose <2,0>
+1430686032 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686033 || [Thread:12] || INFO || randomly chose <2,0>
+1430686033 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686034 || [Thread:12] || INFO || randomly chose <2,0>
+1430686034 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686035 || [Thread:12] || INFO || randomly chose <2,0>
+1430686035 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686036 || [Thread:12] || INFO || randomly chose <2,0>
+1430686036 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686037 || [Thread:12] || INFO || randomly chose <2,0>
+1430686037 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686038 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--2;;;0=2:<2,0>=0:
+1430686038 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND--2~~3~~0~~PUT==a==b
+1430686038 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND---1~~3~~0~~PUT==a==b
+1430686038 || [Thread:12] || INFO || randomly chose <2,0>
+1430686038 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686039 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686039 || [Thread:12] || INFO || randomly chose <2,0>
+1430686039 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686040 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686040 || [Thread:12] || INFO || randomly chose <2,0>
+1430686040 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686041 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686041 || [Thread:12] || INFO || randomly chose <2,0>
+1430686041 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686042 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686042 || [Thread:12] || INFO || randomly chose <2,0>
+1430686042 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686043 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686043 || [Thread:12] || INFO || randomly chose <2,0>
+1430686043 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686044 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686044 || [Thread:12] || INFO || randomly chose <2,0>
+1430686044 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686045 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686045 || [Thread:12] || INFO || randomly chose <2,0>
+1430686045 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686046 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686046 || [Thread:12] || INFO || randomly chose <2,0>
+1430686046 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686047 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686047 || [Thread:12] || INFO || randomly chose <2,0>
+1430686047 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686048 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686048 || [Thread:12] || INFO || randomly chose <2,0>
+1430686048 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686049 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686049 || [Thread:12] || INFO || randomly chose <2,0>
+1430686049 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686049 || [Thread:1] || INFO || Received DISCONNECT1 from Master
+1430686049 || [Thread:1] || INFO || CONTROL: disconnecting <2,0> at port 1
+1430686050 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686050 || [Thread:12] || INFO || randomly chose <2,0>
+1430686050 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686051 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686051 || [Thread:12] || INFO || randomly chose <2,0>
+1430686051 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686052 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686052 || [Thread:12] || INFO || randomly chose <2,0>
+1430686052 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686053 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686053 || [Thread:12] || INFO || randomly chose <2,0>
+1430686053 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686054 || [Thread:12] || INFO || randomly chose <2,0>
+1430686054 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686055 || [Thread:12] || INFO || randomly chose <2,0>
+1430686055 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686056 || [Thread:12] || INFO || randomly chose <2,0>
+1430686056 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686057 || [Thread:12] || INFO || randomly chose <2,0>
+1430686057 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686058 || [Thread:12] || INFO || randomly chose <2,0>
+1430686058 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686059 || [Thread:11] || FINE || Trying to parse: client2--OPERATION--PUT==a==b;;;0=3:
+1430686059 || [Thread:11] || INFO || Performing: -1~~4~~0~~PUT==a==b
+1430686059 || [Thread:11] || INFO || As primary, creating: 3~~4~~0~~PUT==a==b
+1430686059 || [Thread:11] || INFO || Committing: 3~~4~~0~~PUT==a==b
+1430686059 || [Thread:11] || INFO || Sending Message to client2:	0--WRITE_RESULT--0=4:
+1430686059 || [Thread:12] || INFO || randomly chose <2,0>
+1430686059 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686060 || [Thread:12] || INFO || randomly chose <2,0>
+1430686060 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686061 || [Thread:12] || INFO || randomly chose <2,0>
+1430686061 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686062 || [Thread:1] || INFO || Received PRINTLOG from Master
+1430686062 || [Thread:1] || INFO || log printed
+1430686062 || [Thread:12] || INFO || randomly chose <2,0>
+1430686062 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686063 || [Thread:12] || INFO || randomly chose <2,0>
+1430686063 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686064 || [Thread:12] || INFO || randomly chose <2,0>
+1430686064 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686065 || [Thread:1] || INFO || Received RETIRE from Master
+1430686065 || [Thread:1] || INFO || Performing: -1~~5~~0~~RETIRE_NODE==0==localhost==0
+1430686065 || [Thread:1] || INFO || As primary, creating: 4~~5~~0~~RETIRE_NODE==0==localhost==0
+1430686065 || [Thread:1] || INFO || Committing: 4~~5~~0~~RETIRE_NODE==0==localhost==0
+1430686065 || [Thread:1] || INFO || Retiring at next opportunity
+1430686065 || [Thread:12] || INFO || randomly chose <2,0>
+1430686065 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686066 || [Thread:12] || INFO || randomly chose <2,0>
+1430686066 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686067 || [Thread:12] || INFO || randomly chose <2,0>
+1430686067 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686068 || [Thread:12] || INFO || randomly chose <2,0>
+1430686068 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686069 || [Thread:12] || INFO || randomly chose <2,0>
+1430686069 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686070 || [Thread:12] || INFO || randomly chose <2,0>
+1430686070 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686071 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686071 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686071 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686071 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686071 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686071 || [Thread:12] || INFO || randomly chose <2,0>
+1430686071 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686072 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686072 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686072 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686072 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686072 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686072 || [Thread:12] || INFO || randomly chose <2,0>
+1430686072 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686073 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686073 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686073 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686073 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686073 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686073 || [Thread:12] || INFO || randomly chose <2,0>
+1430686073 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686074 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686074 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686074 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686074 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686074 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686074 || [Thread:12] || INFO || randomly chose <2,0>
+1430686074 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686075 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686075 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686075 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686075 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686075 || [Thread:11] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686075 || [Thread:12] || INFO || randomly chose <2,0>
+1430686075 || [Thread:12] || INFO || Tried to send to <2,0>, but currently disconnected
+1430686076 || [Thread:1] || INFO || Received CONNECT1 from Master
+1430686076 || [Thread:1] || INFO || CONTROL: reconnecting <2,0> at port 1
+1430686076 || [Thread:11] || FINE || Trying to parse: <2,0>--ENTROPY_REQUEST--3;;;0=3:<2,0>=0:
+1430686076 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND--4~~5~~0~~RETIRE_NODE==0==localhost==0
+1430686076 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND--3~~4~~0~~PUT==a==b
+1430686076 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND---1~~5~~0~~RETIRE_NODE==0==localhost==0
+1430686076 || [Thread:11] || INFO || Sending Message to <2,0>:	0--ENTROPY_COMMAND---1~~4~~0~~PUT==a==b
+1430686076 || [Thread:12] || INFO || randomly chose <2,0>
+1430686076 || [Thread:12] || INFO || Sending Message to <2,0>:	0--ENTROPY_REQUEST--5;;;<2,0>=0:
+1430686076 || [Thread:11] || FINE || Trying to parse: <2,0>--RETIRE_OK--a
+1430686076 || [Thread:11] || INFO || Passing primary status
+1430686076 || [Thread:11] || INFO || Sending Message to <2,0>:	--BECOME_PRIMARY--a

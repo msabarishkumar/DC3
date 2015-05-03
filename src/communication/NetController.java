@@ -141,16 +141,17 @@ public class NetController {
 	 * currently does not notice if server is disconnected - this is easy to change*/
 	public synchronized void sendMsgToRandom(String msg){
 		Object[] processNames = nodes.keySet().toArray();
+		if(processNames.length == 0) return;
 		boolean successfulsend = false;
 		int timeout = 0;
 		while(!successfulsend && (timeout <= processNames.length)){
 			//int randomindex = new Random().nextInt(processNames.length);
-			int randomindex = lastTalk++;                      //not really random anymore
-			if(lastTalk >= processNames.length){   lastTalk = 0;  }   // but need guarantees or stabilize will take a long time
+			if(lastTalk >= processNames.length){   lastTalk = 0;  } //not really random anymore
+			int randomindex = lastTalk++;                          // but need guarantees or stabilize will take a long time
 			String randomProcess = (String) processNames[randomindex];
 			if(randomProcess.equals(NamingProtocol.myself)){
 				// don't ask yourself
-				timeout++;
+				timeout++; 
 			}
 			else if(nodes.get(randomProcess).isClient){
 				// don't ask clients...

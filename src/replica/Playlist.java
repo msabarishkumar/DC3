@@ -9,9 +9,6 @@ public class Playlist {
 	}
 	
 	public void performOperation(Operation op){
-		if(op instanceof AddRetireOperation){
-			return;
-		}
 		switch (op.type) {
 			case PUT:
 				add(op.song, op.url);
