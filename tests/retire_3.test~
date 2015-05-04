@@ -1,0 +1,21 @@
+joinServer 0
+joinServer 1
+joinServer 2
+joinServer 3
+retireServer 0
+retireServer 1
+retireServer 2
+joinClient 4 3
+put 4 x3 y3
+printLog 3
+joinServer 5
+joinServer 6
+joinServer 7
+breakConnection 4 3
+restoreConnection 4 5
+retireServer 4
+retireServer 6
+put 4 x5 y5
+stabilize
+printLog 5
+printLog 7

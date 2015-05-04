@@ -1,9 +1,9 @@
-1430753715 || [Thread:1] || INFO || Server myself: Server connection established
-1430753715 || [Thread:1] || INFO || connecting to server 2
-1430753715 || [Thread:1] || INFO || CONTROL: connecting to serverName at 2, client: false
-1430753715 || [Thread:1] || INFO || Sending Message to serverName:	client7--CONNECT--7
-1430753715 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430753715 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430753723 || [Thread:1] || INFO || Received EXIT from master
-1430753723 || [Thread:1] || INFO || shutting down cause told to
-1430753723 || [Thread:1] || INFO || master down, shutting myself down
+1430764264 || [Thread:1] || INFO || Server myself: Server connection established
+1430764264 || [Thread:1] || INFO || connecting to server 2
+1430764264 || [Thread:1] || INFO || CONTROL: connecting to serverName at 2, client: false
+1430764264 || [Thread:1] || INFO || Sending Message to serverName:	client7--CONNECT--7
+1430764264 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430764265 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430764273 || [Thread:1] || INFO || Received EXIT from master
+1430764273 || [Thread:1] || INFO || shutting down cause told to
+1430764273 || [Thread:1] || INFO || master down, shutting myself down

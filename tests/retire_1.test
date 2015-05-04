@@ -1,9 +1,0 @@
-joinServer 0
-joinServer 1
-joinServer 2
-joinClient 3 0
-joinClient 4 2
-retireServer 1
-stabilize
-get 3 a
-get 4 a

@@ -13,8 +13,8 @@ c6:u1
 PUT:(c5, u0):TRUE
 PUT:(c6, u1):TRUE
 DELETE:(c5):TRUE
-c7:ERR_KEY
-c7:ERR_KEY
-c7:ERR_DEP
-c7:ERR_KEY
-c7:
+c7:u7
+c7:u7
+c7:u7
+c7:u7
+c7:u7

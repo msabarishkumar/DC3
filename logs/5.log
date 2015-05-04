@@ -1,19 +1,19 @@
-1430757311 || [Thread:1] || INFO || Server myself: Server connection established
-1430757311 || [Thread:1] || INFO || connecting to server 3
-1430757311 || [Thread:1] || INFO || CONTROL: connecting to serverName at 3, client: false
-1430757311 || [Thread:1] || INFO || Sending Message to serverName:	client5--CONNECT--5
-1430757311 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430757311 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430757313 || [Thread:1] || INFO || Received PUT==b==456 from master
-1430757313 || [Thread:1] || INFO || Sending PUT==b==456
-1430757313 || [Thread:1] || INFO || Sending Message to serverName:	client5--OPERATION--PUT==b==456;;;0=0:
-1430757313 || [Thread:11] || FINE || Trying to parse: <4,0>--WRITE_RESULT--<4,0>=1:
-1430757313 || [Thread:11] || INFO || Write completed
-1430757315 || [Thread:1] || INFO || Received GETa from master
-1430757315 || [Thread:1] || INFO || Requesting a
-1430757315 || [Thread:1] || INFO || Sending Message to serverName:	client5--READ--a;;;0=0:<4,0>=1:
-1430757315 || [Thread:11] || FINE || Trying to parse: <4,0>--READ_RESULT--123;;;0=5:<3,0>=0:<2,0>=0:<4,0>=1:
-1430757315 || [Thread:11] || INFO || Received url = 123
-1430757315 || [Thread:1] || INFO || Received EXIT from master
-1430757315 || [Thread:1] || INFO || shutting down cause told to
-1430757315 || [Thread:1] || INFO || master down, shutting myself down
+1430764307 || [Thread:1] || INFO || Server myself: Server connection established
+1430764307 || [Thread:1] || INFO || connecting to server 3
+1430764307 || [Thread:1] || INFO || CONTROL: connecting to serverName at 3, client: false
+1430764307 || [Thread:1] || INFO || Sending Message to serverName:	client5--CONNECT--5
+1430764307 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430764307 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430764310 || [Thread:1] || INFO || Received PUT==b==456 from master
+1430764310 || [Thread:1] || INFO || Sending PUT==b==456
+1430764310 || [Thread:1] || INFO || Sending Message to serverName:	client5--OPERATION--PUT==b==456;;;0=0:
+1430764310 || [Thread:11] || FINE || Trying to parse: <4,0>--WRITE_RESULT--<4,0>=1:
+1430764310 || [Thread:11] || INFO || Write completed
+1430764314 || [Thread:1] || INFO || Received GETa from master
+1430764314 || [Thread:1] || INFO || Requesting a
+1430764314 || [Thread:1] || INFO || Sending Message to serverName:	client5--READ--a;;;0=0:<4,0>=1:
+1430764314 || [Thread:11] || FINE || Trying to parse: <4,0>--READ_RESULT--123;;;0=5:<3,0>=0:<2,0>=0:<4,0>=1:
+1430764314 || [Thread:11] || INFO || Received url = 123
+1430764314 || [Thread:1] || INFO || Received EXIT from master
+1430764314 || [Thread:1] || INFO || shutting down cause told to
+1430764314 || [Thread:1] || INFO || master down, shutting myself down

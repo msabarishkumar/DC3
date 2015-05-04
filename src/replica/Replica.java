@@ -43,16 +43,18 @@ public class Replica {
 	private boolean retiring;
 	// if true, the server does not perform anti-entropy
 	private boolean paused;
+	// if false, the server does no perform anti-entropy
+	private boolean named;
 	
 	public Replica(int uniqueId, boolean firstServer) {
 		this.uniqueId = uniqueId;
 		if(firstServer){  // you are the first of your kind
 			processId = "0";
 			isPrimary = true;
+			named = true;
 		}
 		else{
 			processId = NamingProtocol.defaultName;
-			paused = true; //wait until you get a name
 		}
 		try {
 			logger = LoggerSetup.create(LoggerSetup.defaultLogLocation() + "/logs/" + uniqueId + ".log");	
@@ -169,7 +171,7 @@ public class Replica {
 				MessageWithClock receivedClock = new MessageWithClock(parts[0]);
 				if(!memory.tentativeClock.containsKey(message.process_id)){
 					// you weren't aware of this process, you should include it for future entropy requests
-					controller.connect("temp"+parts[1], Integer.parseInt(parts[1]));
+					controller.connect(NamingProtocol.getTempName(Integer.parseInt(parts[1])), Integer.parseInt(parts[1]));
 				}
 				memory.checkUndeliveredMessages();
 				Set<Command> allcommands = memory.unseenCommands(receivedClock.vector, Integer.parseInt(receivedClock.message));
@@ -240,8 +242,8 @@ public class Replica {
 					controller.nodes.put(message.process_id, controller.nodes.get(NamingProtocol.referralName));
 					controller.nodes.remove(NamingProtocol.referralName);
 				}
-				logger.info("done naming");
-				paused = false;
+				System.out.println("NAMED");
+				named = true;
 				break;
 				
 			case RETIRE_OK:
@@ -342,7 +344,7 @@ public class Replica {
 			public void run() {
 				logger.info("Starting entropy thread");
 				while(true) {
-					if(!paused){
+					if(!paused && named){
 						memoryLock.lock();
 						
 						antiEntropy();
@@ -416,11 +418,6 @@ public class Replica {
 				logger.info("log printed");
 				memoryLock.unlock();
 			}
-			//else if(inputline.startsWith("NEWREPLICA")){
-				// needed for entropy with nodes you haven't seen the JOIN for (which may be necessary, as in test 1_2)
-			//	int newId = Integer.parseInt(inputline.substring(10));
-			//	controller.connect("temp"+newId, newId);
-			//}
 			else if(inputline.equals("EXIT")){
 				logger.info("told by Master to shut down");
 				shutdown();

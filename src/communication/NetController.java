@@ -171,9 +171,9 @@ public class NetController {
 			logger.warning("already connected to process "+name);
 			return;
 		}
-		if(nodes.containsKey("temp"+id)){   // now you actually know who this server is
-			nodes.put(name,  nodes.get("temp"+id));
-			nodes.remove("temp"+id);
+		if(nodes.containsKey(NamingProtocol.getTempName(id))){   // now you actually know who this server is
+			nodes.put(name,  nodes.get(NamingProtocol.getTempName(id)));
+			nodes.remove(NamingProtocol.getTempName(id));
 		}
 		logger.info("CONTROL: connecting to "+name+" at "+id+", client: "+NamingProtocol.isClientName(name));
 		nodes.put(name, new OutStub(id, NamingProtocol.isClientName(name)));

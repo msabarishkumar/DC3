@@ -36,11 +36,9 @@ public class Master {
             	processes.put(serverId,createFirstServer(serverId));
             }
             else{
-                //for(int server : awakeServers){
-                //	processes.get(server).out.println("NEWREPLICA"+serverId);
-                //}
             	int serverToTalkTo = Collections.min(awakeServers);   // choose the oldest server to talk to
             	processes.put(serverId,createServer(serverId, serverToTalkTo));
+            	blockUntil(processes.get(serverId).in, "NAMED");
             }
             awakeServers.add(serverId);
             numOperations++;
@@ -137,11 +135,22 @@ public class Master {
              * time that this function blocks for should increase linearly with the 
              * number of servers in the system.
              */
+        	long longestchain = awakeServers.size() - 1;
+    		long timeToWait = longestchain * longestchain * 500;
+    		
         	if(allConnected(cuts)){
-        		// there are no partitions, so wait until everyone is up to date
+        		 // there are no partitions, so wait until everyone is up to date
+        		//  EDIT: must time out anyways, because dependent writes can just be ignored
         		int numStable = 0;
-        		while(numStable < awakeServers.size()){
+        		long timeWaited = 0;
+        		while((numStable < awakeServers.size()) && (timeWaited < timeToWait)){
         			numStable = 0;
+    				try {
+						Thread.sleep( 1000 );
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+    				timeWaited += 1000;
         			for(int i : awakeServers){
         				processes.get(i).out.println("STABILIZE" + numOperations);
         				String response = blockUntil(processes.get(i).in, "STABLE_");
@@ -153,8 +162,6 @@ public class Master {
         	}
         	else{
         		// its very hard to make guarantees for a partitioned system, so just wait for a long time
-        		long longestchain = awakeServers.size() - 1;
-        		long timeToWait = longestchain * longestchain * 500;
         		try {
 					Thread.sleep(timeToWait);
 				} catch (InterruptedException e) {

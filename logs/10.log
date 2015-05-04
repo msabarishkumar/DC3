@@ -1,24 +1,24 @@
-1430753700 || [Thread:1] || INFO || Server myself: Server connection established
-1430753700 || [Thread:1] || INFO || connecting to server 4
-1430753700 || [Thread:1] || INFO || CONTROL: connecting to serverName at 4, client: false
-1430753700 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430753700 || [Thread:1] || INFO || Sending Message to serverName:	client10--CONNECT--10
-1430753700 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430753700 || [Thread:1] || INFO || Received GETc5 from master
-1430753700 || [Thread:1] || INFO || Requesting c5
-1430753700 || [Thread:1] || INFO || Sending Message to serverName:	client10--READ--c5;;;0=0:
-1430753700 || [Thread:11] || FINE || Trying to parse: <5,0>--READ_RESULT--u0;;;<5,0>=0:0=6:<3,0>=0:<2,0>=1:<4,0>=0:
-1430753700 || [Thread:11] || INFO || Received url = u0
-1430753700 || [Thread:1] || INFO || Received GETc6 from master
-1430753700 || [Thread:1] || INFO || Requesting c6
-1430753700 || [Thread:1] || INFO || Sending Message to serverName:	client10--READ--c6;;;<5,0>=0:0=6:<3,0>=0:<2,0>=1:<4,0>=0:
-1430753700 || [Thread:11] || FINE || Trying to parse: <5,0>--READ_RESULT--u1;;;<5,0>=0:0=6:<3,0>=0:<2,0>=1:<4,0>=0:
-1430753700 || [Thread:11] || INFO || Received url = u1
-1430753700 || [Thread:1] || INFO || Received DELETE==c5== from master
-1430753700 || [Thread:1] || INFO || Sending DELETE==c5==
-1430753700 || [Thread:1] || INFO || Sending Message to serverName:	client10--OPERATION--DELETE==c5==;;;<5,0>=0:0=6:<3,0>=0:<2,0>=1:<4,0>=0:
-1430753700 || [Thread:11] || FINE || Trying to parse: <5,0>--WRITE_RESULT--<5,0>=1:
-1430753700 || [Thread:11] || INFO || Write completed
-1430753704 || [Thread:1] || INFO || Received EXIT from master
-1430753704 || [Thread:1] || INFO || shutting down cause told to
-1430753704 || [Thread:1] || INFO || master down, shutting myself down
+1430764260 || [Thread:1] || INFO || Server myself: Server connection established
+1430764260 || [Thread:1] || INFO || connecting to server 4
+1430764260 || [Thread:1] || INFO || CONTROL: connecting to serverName at 4, client: false
+1430764260 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430764260 || [Thread:1] || INFO || Sending Message to serverName:	client10--CONNECT--10
+1430764260 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430764260 || [Thread:1] || INFO || Received GETc5 from master
+1430764260 || [Thread:1] || INFO || Requesting c5
+1430764260 || [Thread:1] || INFO || Sending Message to serverName:	client10--READ--c5;;;0=0:
+1430764260 || [Thread:11] || FINE || Trying to parse: <5,0>--READ_RESULT--u0;;;<5,0>=0:0=6:<3,0>=0:<2,0>=1:<4,0>=0:
+1430764260 || [Thread:11] || INFO || Received url = u0
+1430764260 || [Thread:1] || INFO || Received GETc6 from master
+1430764260 || [Thread:1] || INFO || Requesting c6
+1430764260 || [Thread:1] || INFO || Sending Message to serverName:	client10--READ--c6;;;<5,0>=0:0=6:<3,0>=0:<2,0>=1:<4,0>=0:
+1430764260 || [Thread:11] || FINE || Trying to parse: <5,0>--READ_RESULT--u1;;;<5,0>=0:0=6:<3,0>=0:<2,0>=1:<4,0>=0:
+1430764260 || [Thread:11] || INFO || Received url = u1
+1430764260 || [Thread:1] || INFO || Received DELETE==c5== from master
+1430764260 || [Thread:1] || INFO || Sending DELETE==c5==
+1430764260 || [Thread:1] || INFO || Sending Message to serverName:	client10--OPERATION--DELETE==c5==;;;<5,0>=0:0=6:<3,0>=0:<2,0>=1:<4,0>=0:
+1430764260 || [Thread:11] || FINE || Trying to parse: <5,0>--WRITE_RESULT--<5,0>=1:
+1430764260 || [Thread:11] || INFO || Write completed
+1430764262 || [Thread:1] || INFO || Received EXIT from master
+1430764262 || [Thread:1] || INFO || shutting down cause told to
+1430764262 || [Thread:1] || INFO || master down, shutting myself down
