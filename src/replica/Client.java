@@ -167,9 +167,9 @@ public class Client {
 				connectToServer(port);
 			}
 			else if(inputline.startsWith("DISCONNECT")){
-				int port = Integer.parseInt(inputline.substring(10));
-				// at the moment, ignore this as CONNECT gets rid of old server
-				// and you will only receive instructions if properly connected
+				//int port = Integer.parseInt(inputline.substring(10));
+				 // at the moment, ignore this as CONNECT gets rid of old server
+				//  and you will only receive instructions if properly connected
 			}
 			else if(inputline.startsWith("PUT") || inputline.startsWith("DELETE")){
 				sendWrite(inputline);

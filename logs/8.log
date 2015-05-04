@@ -1,25 +1,25 @@
-1430697137 || [Thread:1] || INFO || Server myself: Server connection established
-1430697137 || [Thread:1] || INFO || connecting to server 3
-1430697137 || [Thread:1] || INFO || CONTROL: connecting to serverName at 3, client: false
-1430697137 || [Thread:1] || INFO || Sending Message to serverName:	client8--CONNECT--8
-1430697137 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430697137 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430697137 || [Thread:1] || INFO || Received PUT==c0==u1 from master
-1430697137 || [Thread:1] || INFO || Sending PUT==c0==u1
-1430697137 || [Thread:1] || INFO || Sending Message to serverName:	client8--OPERATION--PUT==c0==u1;;;0=0:
-1430697137 || [Thread:11] || FINE || Trying to parse: <4,0>--WRITE_RESULT--<4,0>=1:
-1430697137 || [Thread:11] || INFO || Write completed
-1430697160 || [Thread:1] || INFO || Received CONNECT0 from master
-1430697160 || [Thread:1] || INFO || Closing connection to old server
-1430697160 || [Thread:1] || INFO || connecting to server 0
-1430697160 || [Thread:1] || INFO || CONTROL: connecting to serverName at 0, client: false
-1430697160 || [Thread:1] || INFO || Sending Message to serverName:	client8--CONNECT--8
-1430697160 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
-1430697160 || [Thread:1] || INFO || Received GETc0 from master
-1430697160 || [Thread:1] || INFO || Requesting c0
-1430697160 || [Thread:1] || INFO || Sending Message to serverName:	client8--READ--c0;;;0=0:<4,0>=1:
-1430697160 || [Thread:11] || FINE || Trying to parse: 0--READ_RESULT--ERR_DEP;;;<5,0>=0:0=6:<3,0>=0:<2,0>=0:<4,0>=0:
-1430697160 || [Thread:11] || INFO || Received url = ERR_DEP
-1430697160 || [Thread:1] || INFO || Received EXIT from master
-1430697160 || [Thread:1] || INFO || shutting down cause told to
-1430697160 || [Thread:1] || INFO || master down, shutting myself down
+1430753715 || [Thread:1] || INFO || Server myself: Server connection established
+1430753715 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430753715 || [Thread:1] || INFO || connecting to server 3
+1430753715 || [Thread:1] || INFO || CONTROL: connecting to serverName at 3, client: false
+1430753715 || [Thread:1] || INFO || Sending Message to serverName:	client8--CONNECT--8
+1430753715 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430753715 || [Thread:1] || INFO || Received PUT==c0==u1 from master
+1430753715 || [Thread:1] || INFO || Sending PUT==c0==u1
+1430753715 || [Thread:1] || INFO || Sending Message to serverName:	client8--OPERATION--PUT==c0==u1;;;0=0:
+1430753715 || [Thread:11] || FINE || Trying to parse: <4,0>--WRITE_RESULT--<4,0>=1:
+1430753715 || [Thread:11] || INFO || Write completed
+1430753723 || [Thread:1] || INFO || Received CONNECT0 from master
+1430753723 || [Thread:1] || INFO || Closing connection to old server
+1430753723 || [Thread:1] || INFO || connecting to server 0
+1430753723 || [Thread:1] || INFO || CONTROL: connecting to serverName at 0, client: false
+1430753723 || [Thread:1] || INFO || Sending Message to serverName:	client8--CONNECT--8
+1430753723 || [Thread:9] || INFO || Server myself: New incoming connection accepted from localhost
+1430753723 || [Thread:1] || INFO || Received GETc0 from master
+1430753723 || [Thread:1] || INFO || Requesting c0
+1430753723 || [Thread:1] || INFO || Sending Message to serverName:	client8--READ--c0;;;0=0:<4,0>=1:
+1430753723 || [Thread:11] || FINE || Trying to parse: 0--READ_RESULT--ERR_DEP;;;<5,0>=0:0=6:<3,0>=0:<2,0>=0:<4,0>=0:
+1430753723 || [Thread:11] || INFO || Received url = ERR_DEP
+1430753723 || [Thread:1] || INFO || Received EXIT from master
+1430753723 || [Thread:1] || INFO || shutting down cause told to
+1430753723 || [Thread:1] || INFO || master down, shutting myself down

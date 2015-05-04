@@ -5,12 +5,11 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
 public class Master {
-
+	
   public static void main(String [] args) {
 	
 	// where all replicas and clients are stored
@@ -19,7 +18,7 @@ public class Master {
 	Set<Integer> awakeServers = new HashSet<Integer>();
 	// a counter so that replicas can know if they are fully caught up during stabilize
 	int numOperations = 0;
-	//
+	// 
 	HashMap<Integer, HashSet<Integer>> cuts = new HashMap<Integer, HashSet<Integer>>();
 	
     Scanner scan = new Scanner(System.in);
@@ -86,8 +85,10 @@ public class Master {
              */
 	    	processes.get(id1).out.println("DISCONNECT"+id2);
 	    	processes.get(id2).out.println("DISCONNECT"+id1);
-	    	cuts.get(id1).add(id2);
-	    	cuts.get(id2).add(id1);
+	    	if(awakeServers.contains(id1) && awakeServers.contains(id2)){
+	    		cuts.get(id1).add(id2);
+	    		cuts.get(id2).add(id1);
+	    	}
             break;
             
             
@@ -100,8 +101,10 @@ public class Master {
              */
 	    	processes.get(id1).out.println("CONNECT"+id2);
 	    	processes.get(id2).out.println("CONNECT"+id1);
-	    	cuts.get(id1).remove(id2);
-	    	cuts.get(id2).remove(id1);
+	    	if(awakeServers.contains(id1) && awakeServers.contains(id2)){
+	    		cuts.get(id1).remove(id2);
+	    		cuts.get(id2).remove(id1);
+	    	}
             break;
             
             
@@ -134,12 +137,33 @@ public class Master {
              * time that this function blocks for should increase linearly with the 
              * number of servers in the system.
              */
-        	try {
-				Thread.sleep(500);       // give the servers a chance to stabilize, so maybe you won't have to wait as long
-			} catch (InterruptedException e) { e.printStackTrace(); }
-        	for(int i : awakeServers){
-        		processes.get(i).out.println("STABILIZE" + numOperations);
-        		blockUntil(processes.get(i).in, "STABLE");
+        	if(allConnected(cuts)){
+        		// there are no partitions, so wait until everyone is up to date
+        		int numStable = 0;
+        		while(numStable < awakeServers.size()){
+        			numStable = 0;
+        			for(int i : awakeServers){
+        				processes.get(i).out.println("STABILIZE" + numOperations);
+        				String response = blockUntil(processes.get(i).in, "STABLE_");
+        				if(response.equals("YES")){
+        					numStable++;
+        				}
+        			}
+        		}
+        	}
+        	else{
+        		// its very hard to make guarantees for a partitioned system, so just wait for a long time
+        		long longestchain = awakeServers.size() - 1;
+        		long timeToWait = longestchain * longestchain * 500;
+        		try {
+					Thread.sleep(timeToWait);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+        		for(int i : awakeServers){
+            		processes.get(i).out.println("STABILIZE" + 0);
+            		blockUntil(processes.get(i).in, "STABLE_");
+            	}
         	}
             break;
             
@@ -273,20 +297,21 @@ public class Master {
   }
   
   
-  /** Simple method to block until a desired response, throws out any other input */
-  private static void blockUntil(BufferedReader input, String codeword){
+  /** Simple method to block until a desired response, throws out any other input
+   *  returns anything printed after codeword (in same line) */
+  private static String blockUntil(BufferedReader input, String codeword){
 	  while(true){
 		  try{
 			  String line = input.readLine();
 			  if(line == null){
 			  }
-			  else if(line.equals(codeword)){
-				  return;
+			  else if(line.startsWith(codeword)){
+				  return line.substring(codeword.length());
 			  }
 			  else{
 				  System.out.println("Was blocking for "+codeword+",");
 				  System.out.println("   but got "+line);
-				  return;
+				  return "";
 			  }
 		  } catch(IOException e){ e.printStackTrace(); }
 	  }
@@ -313,20 +338,28 @@ public class Master {
 	  }
   }
   
-  /** determines if there is a partition in the replica graph */
+  
+  /** determines if there is a partition in the replica graph
+   *  this may overestimate partitions in very sparse cases , like test 1_2*/
   private static boolean allConnected(HashMap<Integer, HashSet<Integer>> cuts){
+	  
 	  Set<Integer> servers = new HashSet<Integer>(cuts.keySet());
+	  recursiveCut(cuts, servers, servers.iterator().next());
+	  return servers.isEmpty();
+  }
+  
+  private static void recursiveCut(HashMap<Integer, HashSet<Integer>> cuts, Set<Integer> servers, int thisServer){
+	  servers.remove(thisServer);
+	  if(servers.isEmpty()){
+		  return;
+	  }
 	  for(int i : cuts.keySet()){
-		  if(!cuts.get(0).contains(i)){
-			  servers.remove(i);
-			  for(int j : cuts.keySet()){
-				  if(!cuts.get(i).contains(j)){
-					  servers.remove(j);
-				  }
+		  if(servers.contains(i)){
+			  if(!cuts.get(thisServer).contains(i)){
+				  recursiveCut(cuts, servers, i);
 			  }
 		  }
 	  }
-	  return servers.isEmpty();
   }
   
 }

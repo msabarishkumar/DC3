@@ -1,11 +1,7 @@
 package replica;
 
-import java.io.IOException;
 import java.util.HashMap;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Scanner;
 
 import java.util.Set;
@@ -405,25 +401,13 @@ public class Replica {
 				int opsIShouldSee = Integer.parseInt(inputline.substring(9));
 				memoryLock.lock();
 				memory.checkUndeliveredMessages();
-				
-				if(memory.committedWriteLog.size() == opsIShouldSee){
+				String response = "NO";
+				if((memory.committedWriteLog.size() >= opsIShouldSee) && (memory.deliveredWriteLog.size() >= opsIShouldSee)){
 					logger.info("Received STABILIZE, and am currently stable");
+					response = "YES";
 				}
-				else{
-					//wait long enough that you will have gossiped with everyone
-					long waitTillStable = controller.nodes.size() * 750;
-					logger.info("Received STABILIZE, waiting for " + waitTillStable);
-					memoryLock.unlock();
-					try {
-						Thread.sleep(waitTillStable);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					memoryLock.lock();
-				}
-				memory.checkUndeliveredMessages();
 				memoryLock.unlock();
-				System.out.println("STABLE");
+				System.out.println("STABLE_"+response);
 			}
 			else if(inputline.equals("PRINTLOG")){
 				memoryLock.lock();
