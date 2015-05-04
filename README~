@@ -1,0 +1,8 @@
+--To re-compile all files:
+javac -d . src/*.java
+javac -d bin/util src/util/*.java
+javac -d bin/communication src/communication/*.java
+javac -d bin/replica src/replica/*.java
+
+--To run from command line:
+java Master

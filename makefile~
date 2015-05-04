@@ -1,0 +1,38 @@
+
+JFLAGS = -g
+JC = javac
+.SUFFIXES: .java .class
+.java.class:
+        $(JC) $(JFLAGS) $*.java
+
+CLASSES = \
+	replica.Replica.java \
+	replica.Client.java \
+	replica.Message.java \
+	replica.MessageType.java \
+	replica.Command.java \
+	replica.Operation.java \
+	replica.OperationType.java \
+	replica.AddRetireOperation.java \
+	replica.Memory.java \
+	replica.NamingProtocol.java \
+	replica.Playlist.java \
+	replica.VectorClock.java \
+	replica.MessageWithClock.java \
+	replica.InputPacket.java \
+	communication.IncomingSock.java \
+	communication.OutStub.java \
+	communication.ListenServer.java \
+	communication.NetController.java \
+	communication.OutgoingSock.java \
+	util.LoggerSetup.java \
+	util.Queue.java \
+	Master.java \
+	ProcessHandler.java \
+
+default: classes
+
+classes: $(CLASSES:.java=.class)
+
+clean:
+        $(RM) *.class
