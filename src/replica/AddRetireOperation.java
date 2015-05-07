@@ -1,6 +1,7 @@
 package replica;
 
 public class AddRetireOperation extends Operation {
+
 	OperationType type;
 	String process_id;
 	String host;

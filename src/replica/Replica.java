@@ -14,7 +14,7 @@ import util.Queue;
 
 public class Replica {
 	// Process Id attached to this replica. This is not the system ProcessID, but just an identifier to identify the server.
-	static String processId;
+	String processId;
 	
 	// this is the process ID as seen by the tester, as well as the socket port number
 	// it is only used before a proper name has been chosen
@@ -27,8 +27,8 @@ public class Replica {
 	private final Queue<InputPacket> queue;
 	
 	// This is where we maintain all the play lists (committed play list is used to roll back the primary one)
-	static Playlist playlist = new Playlist();
-	static final Playlist committedPlaylist = new Playlist();
+	Playlist playlist = new Playlist();
+	final Playlist committedPlaylist = new Playlist();
 	
 	// Controller instance used to send messages to all the replicas.
 	private final NetController controller;
@@ -337,8 +337,7 @@ public class Replica {
 	}
 	
 	
-	/** send a request periodically 
-	 * TODO: figure out good amount of time */
+	/** send a request periodically */
 	private void entropyThread(){
 		Thread th = new Thread() {
 			public void run() {
@@ -352,7 +351,7 @@ public class Replica {
 						memoryLock.unlock();
 					}
 					try {
-						Thread.sleep( 500 );
+						Thread.sleep( 300 );
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -368,12 +367,7 @@ public class Replica {
 		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString()+"PORT"+uniqueId);
 		controller.sendMsgToRandom(msg.toString());
 	}
-	/** send entropy request to a specific replica you are connected to */
-	private void antiEntropy(String process){
-		MessageWithClock clockandcsn = new MessageWithClock(""+memory.csn, memory.tentativeClock);
-		Message msg = new Message(processId, MessageType.ENTROPY_REQUEST,clockandcsn.toString()+"PORT"+uniqueId);
-		controller.sendMsg(process, msg.toString());
-	}
+
 	
 	/** takes commands from Master and gives feedback */
 	private void listenToMaster(){
@@ -432,49 +426,6 @@ public class Replica {
 	private void shutdown(){
 		controller.shutdown();
 		System.exit(1);
-	}
-	
-	/** for testing without Master constraint */
-	private void test(){
-		Scanner sc = new Scanner(System.in);
-		while(sc.hasNext()){
-			String inputline = sc.nextLine();
-			
-			if(inputline.equals("retire")){
-				retire();
-			}
-			else if(inputline.equals("print")){
-				memory.printClocks();
-				memory.printLogs();
-			}
-			else if(inputline.equals("rebuild")){
-				memory.buildPlaylist();
-			}
-			else if(inputline.equals("printlog")){
-				memory.printLog();
-			}
-			else if(inputline.equals("printlist")){
-				System.out.println(playlist.toString());
-			}
-			else if(inputline.equals("entropy")){
-				antiEntropy();
-			}
-			else if(inputline.equals("check")){
-				memory.checkUndeliveredMessages();
-			}
-			else if(inputline.startsWith("DISCONNECT")){
-				int idToDisconnect = Integer.parseInt(inputline.substring(10));
-				controller.disconnect(idToDisconnect);
-			}
-			else if(inputline.startsWith("CONNECT")){
-				int idToConnect = Integer.parseInt(inputline.substring(7));
-				controller.restoreConnection(idToConnect);
-			}
-			else{
-				controller.sendMsg(NamingProtocol.myself,inputline);
-			}
-		}
-		sc.close();
 	}
 	
 }

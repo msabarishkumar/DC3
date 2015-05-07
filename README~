@@ -1,8 +1,21 @@
---To re-compile all files:
+Michael Motro mjm5925
+Sabarish Kumar 
+
+--To re-compile all files, run these two lines:
+javac -d bin src/util/*.java src/communication/*.java src/replica/*.java
 javac -d . src/*.java
-javac -d bin/util src/util/*.java
-javac -d bin/communication src/communication/*.java
-javac -d bin/replica src/replica/*.java
 
 --To run from command line:
 java Master
+
+--To run processes separately from command line
+cd bin
+java replica.Replica {ID}         (for first replica)
+java replica.Replica {ID} {ID of replica to write me into the system}
+java replica.Client {ID} {ID of replica to connect to}
+
+--Design:
+Upon creation, replicas ask some other replica for a name and block until they receive one.  The naming server will make an ADD operation that is treated the same as a write to the log (but not printed in the log).
+Anti-entropy communications are sent periodically between servers that know of each other's existence.  To stabilize, the program simply blocks for a long time.  Processes also inform the Master of how many stable writes they've seen, so that the stabilization wait can end early in most cases.
+Disconnects between replicas are handled by each replica's communication object, and not "known" by replicas themselves.
+Clients and replicas are separate Java processes that use their default I/O to talk to the Master.

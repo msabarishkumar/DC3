@@ -6,7 +6,7 @@ import java.util.concurrent.locks.*;
 import replica.InputPacket;
 
 @SuppressWarnings("hiding")
-public class Queue<InputPacket> extends ConcurrentLinkedQueue<InputPacket> {
+public class Queue<InputPacket> extends ConcurrentLinkedQueue<replica.InputPacket> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -25,7 +25,7 @@ public class Queue<InputPacket> extends ConcurrentLinkedQueue<InputPacket> {
 				notEmpty.signal();
 				return true;
 			}
-			boolean status = super.offer((InputPacket) packet);
+			boolean status = super.offer((replica.InputPacket) packet);
 			notEmpty.signal();
 			return status;
 		}
@@ -34,7 +34,7 @@ public class Queue<InputPacket> extends ConcurrentLinkedQueue<InputPacket> {
 		}
 	}
 	
-	public InputPacket poll() {
+	public replica.InputPacket poll() {
 		lock.lock();
 		try {
 			while (this.size() == 0 || pausedFlag) {
@@ -44,7 +44,7 @@ public class Queue<InputPacket> extends ConcurrentLinkedQueue<InputPacket> {
 					e.printStackTrace();
 				}
 			}
-			InputPacket result = super.poll();
+			replica.InputPacket result = super.poll();
 			return result;
 		} finally {
 			lock.unlock();

@@ -143,13 +143,6 @@ public class Client {
 		}
 	}
 	
-	/** for testing */
-	private void printVectors(){
-		System.out.println("---- client vector:");
-		for(String s : vector.keySet()){
-			System.out.println(s + " = "+ vector.get(s));
-		}
-	}
 
 	private void listenToMaster(){
 		Scanner sc = new Scanner(System.in);
@@ -179,35 +172,6 @@ public class Client {
 			}
 			else{
 				logger.info("I didn't understand "+inputline);
-			}
-		}
-		logger.info("master down, shutting myself down");
-		sc.close();
-	}
-	
-	/** for testing without master constraint */
-	private void test(){
-		Scanner sc = new Scanner(System.in);
-		while(sc.hasNext()){
-			String inputline = sc.nextLine();
-			
-			if(inputline.equals("exit")){
-				sc.close();
-				logger.info("shutting down cause told to");
-				break;
-			}
-			else if(inputline.startsWith("connect")){
-				int port = Integer.parseInt(inputline.substring(7));
-				connectToServer(port);
-			}
-			else if(inputline.equals("printclock")){
-				printVectors();
-			}
-			else if(inputline.startsWith("READ")){
-				sendRead(inputline.substring(4));
-			}
-			else{
-				sendWrite(inputline);
 			}
 		}
 		logger.info("master down, shutting myself down");

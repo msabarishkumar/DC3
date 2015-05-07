@@ -15,6 +15,8 @@ public class Playlist {
 				break;
 			case DELETE:
 				delete(op.song);
+				break;
+			default: break;
 		}
 	}
 	
@@ -68,12 +70,14 @@ public class Playlist {
 	
 	public Playlist clone(){
 		Playlist clone = new Playlist();
-		clone.playList = (Hashtable<String, String>) this.playList.clone();
+		//clone.playList = (Hashtable<String, String>) this.playList.clone();
+		clone.playList = new Hashtable<String, String>(this.playList);
 		return clone;
 	}
 }
 
 class SongNotFoundException extends Exception {
+	private static final long serialVersionUID = 1L;
 	public SongNotFoundException(String ex) {
 		super(ex);
 	}

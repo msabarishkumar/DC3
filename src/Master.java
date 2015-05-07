@@ -136,7 +136,7 @@ public class Master {
              * number of servers in the system.
              */
         	long longestchain = awakeServers.size() - 1;
-    		long timeToWait = longestchain * longestchain * 500;
+    		long timeToWait = longestchain * longestchain * 350;
     		
         	if(allConnected(cuts)){
         		 // there are no partitions, so wait until everyone is up to date
